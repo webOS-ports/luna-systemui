@@ -78,10 +78,12 @@ enyo.kind({
 		                   {name:"infoIcon", className:"info-icon", onclick: "showInfo"}
 		                ]
 		 },
+		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center", onclick:"reboot", components:[{content: $L("Restart")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center",  onclick:"poweroff", components:[{content: $L("Shut Down")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"closeAlert", components:[{content: $L("Cancel")}]},
 		 {kind:"PalmService", name:"launchHelp", service:"palm://com.palm.applicationManager/", method:"open"},
-		 {kind: "PalmService", name:"shutdown", service:"palm://com.palm.power/shutdown/", method:"machineOff"}
+		 {kind: "PalmService", name:"shutdown", service:"palm://com.palm.power/shutdown/", method:"machineOff"},
+		 {kind: "PalmService", name:"reboot", service:"palm://com.palm.power/shutdown/", method:"machineReboot"}
 	],
 	
 	create: function() {
@@ -109,6 +111,13 @@ enyo.kind({
 	poweroff: function(inSender) { 
 		this.$.shutdown.call({
 			reason: "Shutdown request by User"
+		});
+		close();
+	},
+
+	reboot: function(inSender) {
+		this.$.reboot.call({
+			reason: "Reboot request by User"
 		});
 		close();
 	},
