@@ -90,7 +90,9 @@ enyo.kind({
 			this.phoneInit();
 		}
 		else {
-			this.checkTelephonyReady();	
+			setTimeout(function() {
+				this.checkTelephonyReady();
+			}, 5000);
 		}
 	},
 	
