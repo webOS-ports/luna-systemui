@@ -7,5 +7,6 @@
 	"splashicon": "icon-256x256.png",
 	"version": "1.0.0",
 	"vendor": "Palm",
-	"noWindow":true
+	"noWindow":true,
+	"visible":"false"
 }

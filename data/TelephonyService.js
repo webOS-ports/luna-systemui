@@ -138,8 +138,8 @@ enyo.kind({
 
 	showNetworkDeniedAlertNow: function() {
 		if(!enyo.windows.fetchWindow("PhoneNetworkDeniedDash")) {
-			enyo.windows.addBannerMessage($L("Unable to connect to network"), "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-error.png')
-			enyo.windows.openDashboard("app/TelephonyAlerts/wirelessalerts.html", "PhoneNetworkDeniedDash", enyo.json.stringify({}), {icon:"/usr/lib/luna/system/luna-systemui/images/notification-small-error.png"});
+			enyo.windows.addBannerMessage($L("Unable to connect to network"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-error.png')
+			enyo.windows.openDashboard("app/TelephonyAlerts/wirelessalerts.html", "PhoneNetworkDeniedDash", enyo.json.stringify({}), {icon:"/usr/palm/applications/com.palm.systemui/images/notification-small-error.png"});
 		}
 	},
 	
@@ -198,8 +198,8 @@ enyo.kind({
 		
 		if(inResponse.status == "started") {
 			if(!enyo.windows.fetchWindow("RAMDumpDash")) {
-				enyo.windows.addBannerMessage($L("Generating RAM logs. Please wait"), "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-info.png')
-				enyo.windows.openDashboard("app/TelephonyAlerts/wirelessalerts.html", "RAMDumpDash", enyo.json.stringify({}), {icon:"/usr/lib/luna/system/luna-systemui/images/notification-small-info.png"});
+				enyo.windows.addBannerMessage($L("Generating RAM logs. Please wait"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-info.png')
+				enyo.windows.openDashboard("app/TelephonyAlerts/wirelessalerts.html", "RAMDumpDash", enyo.json.stringify({}), {icon:"/usr/palm/applications/com.palm.systemui/images/notification-small-info.png"});
 			}
 		}
 		else
@@ -320,7 +320,7 @@ enyo.kind({
 					}
 					this.btProfileStatus[inResponse.profile]  = addr;
 					var bannerMsg = new enyo.g11n.Template($L("Connected to #{name}")).evaluate(inResponse);
-					enyo.windows.addBannerMessage(bannerMsg, "{}", "/usr/lib/luna/system/luna-systemui/images/bluetooth-on.png") ;
+					enyo.windows.addBannerMessage(bannerMsg, "{}", "/usr/palm/applications/com.palm.systemui/images/bluetooth-on.png") ;
 				}
 				else {
 					delete this.btProfileStatus[inResponse.profile];
@@ -354,7 +354,7 @@ enyo.kind({
 				if(inResponse.batterypercentage == undefined)
 					break;
 				if(inResponse.batterypercentage <= 10) {
-					enyo.windows.addBannerMessage($L("Your keyboard battery is low"), "{}", "/usr/lib/luna/system/luna-systemui/images/bluetooth-on.png") ;
+					enyo.windows.addBannerMessage($L("Your keyboard battery is low"), "{}", "/usr/palm/applications/com.palm.systemui/images/bluetooth-on.png") ;
 				}
 		}
 	},

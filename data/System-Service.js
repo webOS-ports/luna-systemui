@@ -122,9 +122,9 @@ enyo.kind({
 	createTutorialDashboard: function (checkActivity) {
 		var wCard = enyo.windows.fetchWindow("TutorialDashboard");
 		if (!wCard) {
-			enyo.windows.addBannerMessage($L("Check out the gesture tutorial"), "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-tutorial.png');
+			enyo.windows.addBannerMessage($L("Check out the gesture tutorial"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-tutorial.png');
 			enyo.windows.openDashboard("app/SystemServiceAlerts/systemservicealerts.html", "TutorialDashboard", "{}", {
-				icon: '/usr/lib/luna/system/luna-systemui/images/notification-small-tutorial.png'
+				icon: '/usr/palm/applications/com.palm.systemui/images/notification-small-tutorial.png'
 			});
 			if(checkActivity)
 				this.checkTutorialActivity();

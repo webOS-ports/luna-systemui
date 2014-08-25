@@ -77,7 +77,7 @@ enyo.kind({
 		var wCard = enyo.windows.fetchWindow("USBDashboard");
 		if(!wCard) {
 			enyo.windows.openDashboard("app/StoragedAlerts/storagedalerts.html", "USBDashboard", {}, {
-				"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-usb.png"
+				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png"
 			});
 		} 
 	},

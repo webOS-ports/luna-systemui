@@ -79,11 +79,11 @@ enyo.kind({
 					}
 					else if(this.batteryLevel > 5 && this.batteryLevel <= 10 && !this.batteryLevel10Shown) {
 						this.batteryLevel10Shown = true;
-						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/lib/luna/system/luna-systemui/images/battery-0.png', "notifications");					
+						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-0.png', "notifications");					
 					}				
 					else if(this.batteryLevel > 10 && this.batteryLevel <= 20 && !this.batteryLevel20Shown) {
 						this.batteryLevel20Shown = true;	
-						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/lib/luna/system/luna-systemui/images/battery-1.png', "notifications");				
+						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-1.png', "notifications");				
 					}
 				}
 					
@@ -135,7 +135,7 @@ enyo.kind({
 					
 				if(!this.chargingBannerShown && (inResponse.DockConnected || inResponse.USBName == "wall")) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
-					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
+					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
 					this.chargingBannerShown = true;
 				}  				
 			}

@@ -115,12 +115,12 @@ enyo.kind({
 		var wCard = enyo.windows.fetchWindow("SysUpdateDownloadFailedDashboard");
 		if(!wCard)
 			enyo.windows.openDashboard("app/SysUpdateAlerts/sysupdatealerts.html", "SysUpdateDownloadFailedDashboard", enyo.json.stringify(launchParams), {
-				"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-update.png"
+				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-update.png"
 			});
 	},
 	
 	showUpdateLaterMessage: function() {
-		enyo.windows.addBannerMessage($L("Update will install at next charge"), {}, "/usr/lib/luna/system/luna-systemui/images/notification-small-update.png");	
+		enyo.windows.addBannerMessage($L("Update will install at next charge"), {}, "/usr/palm/applications/com.palm.systemui/images/notification-small-update.png");	
 	},
 	
 	showDelayedFinalUpdateAlert: function(launchParams) {
@@ -156,9 +156,9 @@ enyo.kind({
 		
 		var wCard = enyo.windows.fetchWindow("SysUpdateAvailableDashboard");
 		if(!wCard) {
-			enyo.windows.addBannerMessage($L("Download in progress..."), enyo.json.stringify({}), '/usr/lib/luna/system/luna-systemui/images/notification-small-update.png');
+			enyo.windows.addBannerMessage($L("Download in progress..."), enyo.json.stringify({}), '/usr/palm/applications/com.palm.systemui/images/notification-small-update.png');
 			enyo.windows.openDashboard("app/SysUpdateAlerts/sysupdatealerts.html", "SysUpdateAvailableDashboard", enyo.json.stringify(launchParams), {
-				"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-update.png"
+				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-update.png"
 			});
 			this.updateProgressDashboardShown = true;
 		}
@@ -183,7 +183,7 @@ enyo.kind({
 		if (!wCard) {
 			this.showUpdateLaterMessage();
 			enyo.windows.openDashboard("app/SysUpdateAlerts/sysupdatealerts.html", "SysUpdateWaitingDashboard", enyo.json.stringify(launchParams), {
-				"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-update.png",
+				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-update.png",
 				persistent: true
 			});
 		}

@@ -110,21 +110,21 @@ enyo.kind({
 		var wCard = enyo.windows.fetchWindow("USBDashboard");
 		if(!wCard) {
 			enyo.windows.openDashboard("storagedalerts.html", "USBDashboard", enyo.json.stringify({}), {
-				"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-usb.png"
+				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png"
 			});
 		} 
 	},
 	
 	charge: function() {	
 		this.tapOnButton = true;
-		//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/lib/luna/system/luna-systemui/images/notification-small-usb.png');
+		//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png');
 		this.createUSBDashboard();	
 		close();
 	},
 	
 	handleWindowDeActivated: function() {
 		if(!this.tapOnButton) {
-			//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/lib/luna/system/luna-systemui/images/notification-small-usb.png');
+			//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png');
 			this.createUSBDashboard();	
 		}
 	},

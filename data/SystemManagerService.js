@@ -137,7 +137,7 @@ enyo.kind({
 			return;
 	
 		if(payload.notify == true) {
-			enyo.windows.addBannerMessage($L("Backup failure"), enyo.json.stringify({action:"launchBackupApp", backupParam: payload}),'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
+			enyo.windows.addBannerMessage($L("Backup failure"), enyo.json.stringify({action:"launchBackupApp", backupParam: payload}),'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
 						
 			var wCard = enyo.windows.fetchWindow("BackupDashboard");
 			if(wCard) {
@@ -145,7 +145,7 @@ enyo.kind({
 			}
 			else {
 				enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "BackupDashboard", enyo.json.stringify(payload), {
-					"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png"
+					"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png"
 				});
 			} 
 		}
@@ -186,8 +186,8 @@ enyo.kind({
 	},
 
 	showDataImportAlert: function() {
-		enyo.windows.addBannerMessage($L("Data ready for transfer"), enyo.json.stringify({action:"launchDataImport"}),'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
-		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "DataImportDashboard", enyo.json.stringify({}), {"icon":"/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png"});
+		enyo.windows.addBannerMessage($L("Data ready for transfer"), enyo.json.stringify({action:"launchDataImport"}),'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
+		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "DataImportDashboard", enyo.json.stringify({}), {"icon":"/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png"});
 	},
 
 	handleDataSyncNotifications: function(payload) {	
@@ -201,8 +201,8 @@ enyo.kind({
 	},
 	
 	showDataSyncAlert: function(dataSyncPayload) {
-		enyo.windows.addBannerMessage($L("Transferring Data"), {},'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
-		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "DataSyncDashboard", enyo.json.stringify(payload), {"icon":"/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png"});
+		enyo.windows.addBannerMessage($L("Transferring Data"), {},'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
+		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "DataSyncDashboard", enyo.json.stringify(payload), {"icon":"/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png"});
 	},
 	
 	handleAccountServiceNotifications: function(payload) {
@@ -222,8 +222,8 @@ enyo.kind({
 							enyo.windows.openPopup("app/SystemManagerAlerts/systemmanageralerts.html", "AccountServiceAlert", payload, undefined, windowHeight);
 							break;
 					case 'passwordError':
-							enyo.windows.addBannerMessage($L("Backup failure"), enyo.json.stringify({action:"launchBackupApp", backupParam: {"passwordRequired": true}}),'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
-							enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "BackupDashboard", enyo.json.stringify({"passwordRequired": true}), {"icon":"/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png"});
+							enyo.windows.addBannerMessage($L("Backup failure"), enyo.json.stringify({action:"launchBackupApp", backupParam: {"passwordRequired": true}}),'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
+							enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "BackupDashboard", enyo.json.stringify({"passwordRequired": true}), {"icon":"/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png"});
 							break;
 					default: return;
 				}
@@ -245,7 +245,7 @@ enyo.kind({
 		
 		msg = new enyo.g11n.Template(msg).evaluate(payload);
 		
-		enyo.windows.addBannerMessage(msg, {},'/usr/lib/luna/system/luna-systemui/images/notification-large-info.png');
+		enyo.windows.addBannerMessage(msg, {},'/usr/palm/applications/com.palm.systemui/images/notification-large-info.png');
 	},
 	
 	handleOpenSearchEngineAvailable: function(payload) {
@@ -253,13 +253,13 @@ enyo.kind({
 			return;
 	
 		var msg = $L("Web Search Engine Available");
-		enyo.windows.addBannerMessage(msg, "{}",'/usr/lib/luna/system/luna-systemui/images/opensearch-small-icon.png');
+		enyo.windows.addBannerMessage(msg, "{}",'/usr/palm/applications/com.palm.systemui/images/opensearch-small-icon.png');
 		var wCard = enyo.windows.fetchWindow("OpenSearchDashboard");
 		if(wCard) {
 			enyo.windows.setWindowParams(wCard, payload);
 		}	
 		else 
-			enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "OpenSearchDashboard", enyo.json.stringify(payload), {"icon":"/usr/lib/luna/system/luna-systemui/images/opensearch-small-icon.png"});
+			enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "OpenSearchDashboard", enyo.json.stringify(payload), {"icon":"/usr/palm/applications/com.palm.systemui/images/opensearch-small-icon.png"});
 	},
 	
 	handledbCriticalErrorNotifications: function(inSender, payload) {
@@ -282,7 +282,7 @@ enyo.kind({
 		var msg = $L("#{appName} #{version} was restored");
 		
 		msg = new enyo.g11n.Template(msg).evaluate(payload);
-		enyo.windows.addBannerMessage(msg, "{}","/usr/lib/luna/system/luna-systemui/images/notification-large-appcatalog.png");
+		enyo.windows.addBannerMessage(msg, "{}","/usr/palm/applications/com.palm.systemui/images/notification-large-appcatalog.png");
 	},
 	
 	handleMigrationStatusNotifications: function(inSender, inResponse) {
@@ -333,14 +333,14 @@ enyo.kind({
 	},
 	
 	handleRecordStop: function(appId){
-		enyo.windows.addBannerMessage($L("Recording Stopped"), "{}", "/usr/lib/luna/system/luna-systemui/images/record-small.png") ;
+		enyo.windows.addBannerMessage($L("Recording Stopped"), "{}", "/usr/palm/applications/com.palm.systemui/images/record-small.png") ;
 		if(enyo.windows.fetchWindow("RecordDashboard"))
 			enyo.windows.fetchWindow("RecordDashboard").close();
 	},
 	
 	showRecordingDashboard: function(appInfo){
-		enyo.windows.addBannerMessage($L("Recording is ON"), "{}", "/usr/lib/luna/system/luna-systemui/images/record-small.png") ;
-		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "RecordDashboard", enyo.json.stringify(appInfo), {"icon":"/usr/lib/luna/system/luna-systemui/images/record-small.png"});
+		enyo.windows.addBannerMessage($L("Recording is ON"), "{}", "/usr/palm/applications/com.palm.systemui/images/record-small.png") ;
+		enyo.windows.openDashboard("app/SystemManagerAlerts/systemmanageralerts.html", "RecordDashboard", enyo.json.stringify(appInfo), {"icon":"/usr/palm/applications/com.palm.systemui/images/record-small.png"});
 	},
 	
 	handleShareContentAlert: function(payload) {
@@ -355,7 +355,7 @@ enyo.kind({
 	showShareContentPairingAlert: function(payload) {
 		if(payload.success && payload.deviceName) {
 			var bannerMsg = new enyo.g11n.Template($L("Device paired to #{deviceName}")).evaluate(payload);
-			enyo.windows.addBannerMessage(bannerMsg, "{}", "/usr/lib/luna/system/luna-systemui/images/bluetooth-on.png") ;
+			enyo.windows.addBannerMessage(bannerMsg, "{}", "/usr/palm/applications/com.palm.systemui/images/bluetooth-on.png") ;
 		}
 		else if(payload.errorType){
 			var windowHeight =  (enyo.g11n.currentLocale().locale == "en_us") ? 120 : 150;
@@ -460,7 +460,7 @@ enyo.kind({
                         return;
 
                 if(payload.icon==undefined)
-                        payload.icon = '/usr/lib/luna/system/luna-systemui/images/notification-large-info.png';
+                        payload.icon = '/usr/palm/applications/com.palm.systemui/images/notification-large-info.png';
                 enyo.windows.addBannerMessage(payload.title, "{}", payload.icon);
 
                 var cardId = "AppNotification"+payload.appId+payload.msgId;

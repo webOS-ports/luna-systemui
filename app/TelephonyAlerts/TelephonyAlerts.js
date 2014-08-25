@@ -134,7 +134,7 @@ enyo.kind({
 	},
 	
 	createDashboard: function() {
-		enyo.windows.openDashboard("wirelessalerts.html", "PhoneSIMDeniedDash", enyo.json.stringify({causeCode:this.causeCode}), {"icon":"/usr/lib/luna/system/luna-systemui/images/notification-small-error.png"});
+		enyo.windows.openDashboard("wirelessalerts.html", "PhoneSIMDeniedDash", enyo.json.stringify({causeCode:this.causeCode}), {"icon":"/usr/palm/applications/com.palm.systemui/images/notification-small-error.png"});
 		close();
 	}
 });

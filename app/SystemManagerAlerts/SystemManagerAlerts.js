@@ -331,7 +331,7 @@ enyo.kind({
 			this._onDeactivate();
 			this.stopSpinner = true;
 			if(!this.isVisible)
-				enyo.windows.addBannerMessage($L("Data Transfer Complete"), {},'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
+				enyo.windows.addBannerMessage($L("Data Transfer Complete"), {},'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
 		}
 		else if(statusObj.errorCode) {
 			this.$.dashtitle.setContent($L("Data Transfer Error"));
@@ -340,7 +340,7 @@ enyo.kind({
 			this._onDeactivate();
 			this.stopSpinner = true;
 			if(!this.isVisible)
-				enyo.windows.addBannerMessage($L("Data Transfer Error!"), {},'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png')
+				enyo.windows.addBannerMessage($L("Data Transfer Error!"), {},'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png')
 		}
 		else {
 			this.$.dashtitle.setContent($L("Transferring Data"));

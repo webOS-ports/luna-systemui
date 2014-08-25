@@ -120,7 +120,7 @@ enyo.kind({
 					return;
 				
 				if (this.restoringApps.length === 0) {
-					enyo.windows.addBannerMessage($L('All applications restored'), "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png');
+					enyo.windows.addBannerMessage($L('All applications restored'), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png');
 					var wCard = enyo.windows.fetchWindow("AppRestoreDash");
 					if(wCard)
 						wCard.close();
@@ -167,16 +167,16 @@ enyo.kind({
 		var wCard = enyo.windows.fetchWindow("AppRestoreDash");
 		
 		if(!wCard) {
-			enyo.windows.addBannerMessage($L("Restoring applications"), "{}", "/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png")
+			enyo.windows.addBannerMessage($L("Restoring applications"), "{}", "/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png")
 			enyo.windows.openDashboard("app/AppManagerAlerts/appmanageralerts.html", "AppRestoreDash", enyo.json.stringify({}), {
-					"icon": "/usr/lib/luna/system/luna-systemui/images/notification-small-sync.png"
+					"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-sync.png"
 				});
 		}
 	},
 
 	showAppDownloadBanner: function(title, msg) {
 		var messageText =  msg + ' ' + title;
-		enyo.windows.addBannerMessage(messageText, "{}",'/usr/lib/luna/system/luna-systemui/images/notification-small-appcatalog.png');
+		enyo.windows.addBannerMessage(messageText, "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-appcatalog.png');
 	},
 
 	showAppDownloadDashboard: function(title, status, appId) {
@@ -187,14 +187,14 @@ enyo.kind({
 		else 
 			msg = $L("Download Failed");
 		
-		enyo.windows.addBannerMessage(msg, "{}", "/usr/lib/luna/system/luna-systemui/images/notification-small-appcatalog.png");
+		enyo.windows.addBannerMessage(msg, "{}", "/usr/palm/applications/com.palm.systemui/images/notification-small-appcatalog.png");
 		
 		var payload = {title:title, status:msg, appId:appId};
 		var wCard = enyo.windows.fetchWindow("AppInstallFailureDash");
 		
 		if(!wCard)
 			enyo.windows.openDashboard("app/AppManagerAlerts/appmanageralerts.html", "AppInstallFailureDash", enyo.json.stringify(payload), {
-					"icon": "/usr/lib/luna/system/luna-systemui/images/notification-large-appcatalog.png"
+					"icon": "/usr/palm/applications/com.palm.systemui/images/notification-large-appcatalog.png"
 				});
 		else {
 			wCard.enyo.$.appInstallFailureDash.update(enyo.json.stringify(payload));
