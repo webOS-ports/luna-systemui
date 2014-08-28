@@ -31,7 +31,6 @@ enyo.kind({
 	components: [
 	             { kind:"SystemManager", name:"subscribeToSystemUI", method:"subscribeToSystemUI", subscribe: true, onSuccess:"handleSystemUINotifications" },
 	             { kind:"SystemManager", name:"getMigrationStatus", method:"getMigrationStatus", subscribe: true, onSuccess:"handleMigrationStatusNotifications"},
-	             { kind:"SystemManager", name:"applicationHasBeenTerminated", method:"applicationHasBeenTerminated", subscribe: true, onSuccess:"handleAppQuitStatus"},
 	             { kind:"SystemManager", name:"getAppRestoreNeeded", method:"getAppRestoreNeeded", subscribe: true, onSuccess:"handleAppRestoreNotifications"},
 				 { kind:"SystemManager", name:"getForegroundApplication", method:"getForegroundApplication", subscribe: true, onSuccess:"handleForegroundApplication"},
 				 { kind:"SystemManager", name:"getLockStatus", method:"getLockStatus", subscribe: true, onSuccess:"handleLockStatus"},
@@ -40,6 +39,7 @@ enyo.kind({
 				 {kind:"PalmService", name:"dbSpaceCheck", service:"palm://com.palm.db/internal/", method:"spaceCheck", subscribe:true, onSuccess:"handledbCriticalErrorNotifications"},
 				 {kind:"PalmService", name:"downloadServerStatus", service:"palm://com.palm.bus/signal/", method:"registerServerStatus", subscribe:true, onResponse:"processServiceStatus"},
 				 {kind:"PalmService", name:"fileSystemSpaceCheck", service:"palm://com.palm.downloadmanager/", method:"filesysStatusCheck", subscribe:true, onSuccess:"handleFileSystemSpaceNotifications"},
+				 {kind:"PalmService", name:"applicationHasBeenTerminated", service:"palm://com.palm.applicationManager/", method:"applicationHasBeenTerminated", subscribe:true, onSuccess:"handleAppQuitStatus"},
 				 {kind:"PalmService", name:"appRestore", service:"palm://com.palm.service.backup/", method:"scheduleAppRestore", onResponse:"handleBackupServiceResponse"}
 	],
 	
