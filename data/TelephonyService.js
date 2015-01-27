@@ -229,12 +229,14 @@ enyo.kind({
 		if(this.phoneType == 'gsm' || SystemPreferences.hideWANErrorAlert)
 		 	return;	
 			
-		 var mipFailureCode;	
+		 var mipFailureCode, causeCode;	
 				
 		 if (inResponse.returnValue && inResponse.networkstatus == "attached" && inResponse.connectedservices && inResponse.connectedservices.length > 0) {
 			for (var i = 0; i < inResponse.connectedservices.length; i++) {
 				if (inResponse.connectedservices[i].service.indexOf("internet") != -1) {
 					mipFailureCode = inResponse.connectedservices[i].mipFailureCode;
+					causeCode = inResponse.connectedservices[i].causeCode;
+					
 					if (mipFailureCode == 0 && causeCode == 0) 
 						this.wanCleanup();
 					else {
