@@ -79,11 +79,13 @@ enyo.kind({
 		                ]
 		 },
 		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center", onclick:"reboot", components:[{content: $L("Restart")}]},
+		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center", onclick:"lunaNextRestart", components:[{content: $L("Luna Next restart")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center",  onclick:"poweroff", components:[{content: $L("Shut Down")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"closeAlert", components:[{content: $L("Cancel")}]},
 		 {kind:"PalmService", name:"launchHelp", service:"palm://com.palm.applicationManager/", method:"open"},
 		 {kind: "PalmService", name:"shutdown", service:"palm://com.palm.power/shutdown/", method:"machineOff"},
-		 {kind: "PalmService", name:"reboot", service:"palm://com.palm.power/shutdown/", method:"machineReboot"}
+		 {kind: "PalmService", name:"reboot", service:"palm://com.palm.power/shutdown/", method:"machineReboot"},
+		 {kind: "PalmService", name:"lunaNextRestart", service:"palm://org.webosports.luna", method: "restart"}
 	],
 	
 	create: function() {
@@ -120,6 +122,10 @@ enyo.kind({
 			reason: "Reboot request by User"
 		});
 		close();
+	},
+
+	lunaNextRestart: function(inSender) {
+		this.$.lunaNextRestart.call({});
 	},
 	
 	closeAlert: function() {

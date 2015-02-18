@@ -208,7 +208,7 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined,135);
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined,460);
 		}
 	},
 	
