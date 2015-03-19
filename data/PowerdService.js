@@ -59,15 +59,18 @@ enyo.kind({
 				this.isCharging = false;
 				return;
 			}
+			
 			if (inResponse.Charging) {
 				this.isCharging = true;
 				this.batteryLevel5Shown = false;
 				this.batteryLevel10Shown = false;
 				this.batteryLevel20Shown = false;
-				if(enyo.windows.fetchWindow("LowBatteryAlert"))
+				enyo.windows.removeBannerMessage(this.bannerMsgList["batteryLevelBannerMsg"]);
+				this.bannerMsgList["batteryLevelBannerMsg"] = undefined;
+
+				if(enyo.windows.fetchWindow("LowBatteryAlert")) {
 					enyo.windows.fetchWindow("LowBatteryAlert").close();
-					enyo.windows.removeBannerMessage(this.bannerMsgList["batteryLevelBannerMsg"]);
-					this.bannerMsgList["batteryLevelBannerMsg"] = undefined;
+				}
 
 				if(this.notChargingAlertTimer) {
 					try{
@@ -76,8 +79,9 @@ enyo.kind({
 					this.notChargingAlertTimer = undefined;
 				}
 
-				if(enyo.windows.fetchWindow("NotChargingAlert"))
+				if(enyo.windows.fetchWindow("NotChargingAlert")) {
 					enyo.windows.fetchWindow("NotChargingAlert").close();
+				}
 
 				if(!this.chargingBannerShown && (inResponse.DockConnected || inResponse.USBName == "wall")) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
@@ -195,8 +199,7 @@ enyo.kind({
 	 * Handle power off notifications
 	 */
 	powerOffHandleNotifications: function(inSender, inResponse) {
-	    if (inResponse["showDialog"])
-	    {
+	    if (inResponse["showDialog"]) {
 			var wCard = enyo.windows.fetchWindow("ResetAlert");
 			if(wCard)
 				return;
