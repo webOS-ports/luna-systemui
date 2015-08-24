@@ -52,7 +52,7 @@ enyo.kind({
 	},
 
 	handleChargerStatus: function(inSender, inResponse) {
-		if(inResponse.DockConnected || inResponse.USBConnected) {
+		if(inResponse.DockConnected || inResponse.USBConnected || (inResponse.Charging && inResponse.USBName == "wall")) {
 			//This is the scenario where dock is detected but it's not placed it properly on the dock.
 			if(inResponse.DockConnected && !inResponse.DockPower) {
 				this.chargingBannerShown = false;
