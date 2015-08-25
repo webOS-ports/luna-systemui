@@ -140,7 +140,7 @@ enyo.kind({
 
 					if(this.batteryLevel <= 5 && !this.batteryLevel5Shown) {
 						this.batteryLevel5Shown = true;
-						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, undefined, 150);
+						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, {"metrics":"units"}, 15);
 					}
 					else if(this.batteryLevel > 5 && this.batteryLevel <= 10 && !this.batteryLevel10Shown) {
 						this.batteryLevel10Shown = true;
@@ -180,7 +180,7 @@ enyo.kind({
 	},
 
 	showNotChargingAlert: function() {
-		enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "NotChargingAlert", {}, undefined, 200);
+		enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "NotChargingAlert", {}, {"metrics":"units"}, 20);
 		this.notChargingAlertTimer = undefined;
 	},
 
@@ -213,7 +213,7 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined,460);
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, {"metrics":"units"}, 25);
 		}
 	},
 
