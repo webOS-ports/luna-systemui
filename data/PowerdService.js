@@ -37,7 +37,6 @@ enyo.kind({
 		this.initialize();
 		this.powerOffInit();
 		this.g11nPercent = new enyo.g11n.NumberFmt({style:"percent"});
-		this.bannerMsgList = [];
 	},
 
 	//Register for Service status.
@@ -49,6 +48,12 @@ enyo.kind({
 		this.chargingBannerShown = false;
 		this.notChargingAlertShown = false;
 		this.notChargingAlertTimer = undefined;
+		
+		setTimeout(enyo.bind(this, "statusQuery"), 2000);
+	},
+	
+	statusQuery: function() {
+		this.$.chargerStatusQuery.call();
 	},
 
 	handleChargerStatus: function(inSender, inResponse) {
@@ -62,11 +67,6 @@ enyo.kind({
 			
 			if (inResponse.Charging) {
 				this.isCharging = true;
-				this.batteryLevel5Shown = false;
-				this.batteryLevel10Shown = false;
-				this.batteryLevel20Shown = false;
-				enyo.windows.removeBannerMessage(this.bannerMsgList["batteryLevelBannerMsg"]);
-				this.bannerMsgList["batteryLevelBannerMsg"] = undefined;
 
 				if(enyo.windows.fetchWindow("LowBatteryAlert")) {
 					enyo.windows.fetchWindow("LowBatteryAlert").close();
@@ -144,15 +144,11 @@ enyo.kind({
 					}
 					else if(this.batteryLevel > 5 && this.batteryLevel <= 10 && !this.batteryLevel10Shown) {
 						this.batteryLevel10Shown = true;
-						enyo.windows.removeBannerMessage(this.bannerMsgList["batteryLevelBannerMsg"]);
-						this.bannerMsgList["batteryLevelBannerMsg"] = undefined;
-						this.bannerMsgList["batteryLevelBannerMsg"] = enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-0.png', "notifications");
+						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-0.png', "notifications");
 					}
 					else if(this.batteryLevel > 10 && this.batteryLevel <= 20 && !this.batteryLevel20Shown) {
 						this.batteryLevel20Shown = true;
-						enyo.windows.removeBannerMessage(this.bannerMsgList["batteryLevelBannerMsg"]);
-						this.bannerMsgList["batteryLevelBannerMsg"] = undefined;
-						this.bannerMsgList["batteryLevelBannerMsg"] = enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-1.png', "notifications");
+						enyo.windows.addBannerMessage(batteryalert, "{}",'/usr/palm/applications/com.palm.systemui/images/battery-1.png', "notifications");
 					}
 				}
 
