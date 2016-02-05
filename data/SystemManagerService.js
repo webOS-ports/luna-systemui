@@ -30,7 +30,6 @@ enyo.kind({
 	
 	components: [
 	             { kind:"SystemManager", name:"subscribeToSystemUI", method:"subscribeToSystemUI", subscribe: true, onSuccess:"handleSystemUINotifications" },
-	             { kind:"SystemManager", name:"getMigrationStatus", method:"getMigrationStatus", subscribe: true, onSuccess:"handleMigrationStatusNotifications"},
 	             { kind:"SystemManager", name:"getAppRestoreNeeded", method:"getAppRestoreNeeded", subscribe: true, onSuccess:"handleAppRestoreNotifications"},
 				 { kind:"SystemManager", name:"getForegroundApplication", method:"getForegroundApplication", subscribe: true, onSuccess:"handleForegroundApplication"},
 				 { kind:"SystemManager", name:"getLockStatus", method:"getLockStatus", subscribe: true, onSuccess:"handleLockStatus"},
@@ -76,7 +75,6 @@ enyo.kind({
 		//Subscribe to SystemManager service.
 		this.$.getAppRestoreNeeded.call();
 		this.$.applicationHasBeenTerminated.call();
-		this.$.getMigrationStatus.call();
 		this.$.subscribeToSystemUI.call();
 		this.$.getForegroundApplication.call();
 		this.$.getLockStatus.call();
@@ -285,12 +283,6 @@ enyo.kind({
 		enyo.windows.addBannerMessage(msg, "{}","/usr/palm/applications/com.palm.systemui/images/notification-large-appcatalog.png");
 	},
 	
-	handleMigrationStatusNotifications: function(inSender, inResponse) {
-		if(inResponse.migrationNeeded) 
-			enyo.windows.openPopup("app/SystemManagerAlerts/systemmanageralerts.html", "AppMigrationFailureAlert", {}, undefined, 200);
-	},
-	
-
 	handleAppQuitStatus: function(inSender, inResponse) {
 		
 		if(!inResponse.id || (/^\s*$/).test(inResponse.id))
