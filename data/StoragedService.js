@@ -25,17 +25,20 @@ enyo.kind({
 	
 	components: [
 		{kind:"PalmService", name:"msmAvail", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"storageHandleNotifications"},
-		{kind:"PalmService", name:"partitionAvail", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"storageHandleErrorNotifications"},
+		{kind:"PalmService", name:"partitionAvail", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"storageHandleErrorNotifications"}/*,
+		FIXME we might want to reconsider this in the future, depening on how we want to deal with storage access.
 		{
 			kind:enyo.PalmService, name:"hostIsConnected", service:"palm://com.palm.storage/diskmode/", method:"hostIsConnected", onResponse:"handleHostIsConnected"
-		},
+		}*/
 		
 	],
 	
 	create: function() {
 		this.inherited(arguments);
 		this.subscribeToNotifications();
+		/*FIXME Disabled since we don't have com.palm.storage (storaged) as per [GF-8105] broken storaged-2.1.0-5 isn't compatible with current nyx-lib-5.1.0-66
 		this.isUSBCableConnected();
+		*/
 	},
 	
 	subscribeToNotifications: function() {
