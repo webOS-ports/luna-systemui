@@ -35,9 +35,10 @@ enyo.kind({
 		{kind:"PalmService", name:"platformQuery", service:"palm://com.palm.telephony/", method:"platformQuery", subscribe:true, onResponse:"gotPlatformType"},
 		{kind:"PalmService", name:"powerQuery", service:"palm://com.palm.telephony/", method:"powerQuery", subscribe:true, onResponse:"handleTelephonyPowerNotifications"},
 		{kind:"PalmService", name:"networkStatusQuery", service:"palm://com.palm.telephony/", method:"networkStatusQuery", subscribe:true, onSuccess:"handleTelephonyNotifications"},
+/*		FIXME We don't have these methods available (yet) in LuneOS, therefore disable them for now
 		{kind:"PalmService", name:"manualNetworkSelectionRequiredQuery", service:"palm://com.palm.telephony/", method:"manualNetworkSelectionRequiredQuery", subscribe:true, onSuccess:"handleMNSRQueryNotification"},
 		{kind:"PalmService", name:"ramDumpQuery", service:"palm://com.palm.telephony/", method:"ramDumpQuery", subscribe:true, onSuccess:"handleRAMDumpQueryNotification"},
-	
+*/
 		{kind:"PalmService", name:"subscribeWANStatus", service:"palm://com.palm.wan/", method:"getstatus", subscribe:true, onSuccess:"handleWANNotifications"},
 		{kind:"PalmService", name:"btProfSubscription", service:"palm://com.palm.bluetooth/prof/", method:"subscribenotifications", subscribe:true, onSuccess:"btHandleNotifications"},
 		{kind:"PalmService", name:"btGapSubscription", service:"palm://com.palm.bluetooth/gap/", method:"subscribenotifications", subscribe:true, onSuccess:"btHandleNotifications"},
@@ -157,8 +158,10 @@ enyo.kind({
 		if(!this.phoneRadioState)
 			this.closePhoneAlerts();
 		this.$.networkStatusQuery.call();
-		this.$.manualNetworkSelectionRequiredQuery.call();
-		this.$.ramDumpQuery.call();
+		/* FIXME We don't have these methods available (yet) in LuneOS, therefore disable them for now
+		//this.$.manualNetworkSelectionRequiredQuery.call();
+		//this.$.ramDumpQuery.call();
+		*/
 	},
 	
 	
