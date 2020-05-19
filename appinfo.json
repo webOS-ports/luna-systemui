@@ -8,5 +8,6 @@
 	"version": "1.0.0",
 	"vendor": "Palm",
 	"noWindow":true,
-	"visible":"false"
+	"visible":"false",
+	"requiredPermissions": ["applications.internal", "settings", "settings.read"] 
 }
