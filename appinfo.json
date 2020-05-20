@@ -9,5 +9,5 @@
 	"vendor": "Palm",
 	"noWindow":true,
 	"visible":"false",
-	"requiredPermissions": ["applications.internal", "settings", "settings.read"] 
+	"requiredPermissions": ["all"] 
 }
