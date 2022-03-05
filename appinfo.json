@@ -7,7 +7,9 @@
 	"splashicon": "icon-256x256.png",
 	"version": "1.0.0",
 	"vendor": "Palm",
+	"defaultWindowType": "system_ui",
+	"noSplashOnLaunch": true,
 	"noWindow":true,
-	"visible":"false",
+	"visible": false,
 	"requiredPermissions": ["all"] 
 }
