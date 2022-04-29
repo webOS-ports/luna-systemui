@@ -36,7 +36,7 @@ enyo.kind({
 	restoringApps: [],
 	
 	components: [
-		{name:"listApps", kind: "PalmService", service:"palm://com.palm.applicationManager/", method:"listApps", onSuccess:"gotAppList"},
+		{name:"listApps", kind: "PalmService", service:"palm://com.webos.service.applicationManager/", method:"listApps", onSuccess:"gotAppList"},
 		{name:"getAppInfo", kind: "PalmService", service:"palm://com.palm.applicationManager/", method:"getAppInfo", onSuccess:"gotAppInfo"},
 		
 		{name:"notifyOnChange", kind: "PalmService", service:"palm://com.palm.appinstaller/", method:"notifyOnChange", subscribe:true, onSuccess:"handleAppChanged"},
