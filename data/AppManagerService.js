@@ -41,9 +41,7 @@ enyo.kind({
 		
 		{name:"notifyOnChange", kind: "PalmService", service:"palm://com.palm.appinstaller/", method:"notifyOnChange", subscribe:true, onSuccess:"handleAppChanged"},
 		
-		/* FIXME this might need to be enabled again once we have DownloadManager available.
-		{name:"appInstallStatus", kind: "PalmService", service:"palm://com.palm.appInstallService/", method:"status", subscribe:true, onSuccess:"handleAppInstallServiceNotifications"},
-		*/
+		{name:"appInstallStatus", kind: "PalmService", service:"palm://com.webos.appInstallService/", method:"status", subscribe:true, onSuccess:"handleAppInstallServiceNotifications"},
 		
 		{name:"pubsubServerStatus", kind:"PalmService", service:"palm://com.palm.bus/signal/", method:"registerServerStatus", subscribe:true, onResponse:"processPubSubServiceStatus"},
 		{name:"registerOnClose", kind: "PalmService", service:"palm://com.palm.pubsubservice/", method:"registerOnClose", subscribe:true, onSuccess:"handleRegisterOnClose"},
@@ -61,9 +59,7 @@ enyo.kind({
 	getAppList: function() {
 		this.$.listApps.call();
 		this.$.notifyOnChange.call();
-		/* FIXME this might need to be enabled again once we have DownloadManager available.
 		this.$.appInstallStatus.call();
-		*/
 	},
 	
 	gotAppList: function(inSender, inResponse){
