@@ -27,7 +27,7 @@ enyo.kind({
 	components: [
 		{kind:enyo.PalmService, name:"batteryStatus", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"handlePowerNotifications"},
 		{kind:"PalmService", name:"usbdockstatus", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"handlePowerNotifications"},
-		{kind:"PalmService", name:"chargerStatusQuery", service:"palm://com.palm.power/com/palm/power/", method:"chargerStatusQuery", onResponse:"handleChargerStatus"},
+		{kind:"PalmService", name:"chargerStatusQuery", service:"palm://com.webos.service.battery/com/palm/power/", method:"chargerStatusQuery", onResponse:"handleChargerStatus"},
 
 		{kind:"PalmService", name:"powerKeyPressed", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"powerOffHandleNotifications"},
 	],
