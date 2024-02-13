@@ -404,7 +404,7 @@ enyo.kind({
 			 	kind:enyo.PalmService, name:"eraseVar", service:"palm://com.palm.storage/erase/", method:"EraseVar"
 		 },
 		 {
-			 	kind:enyo.PalmService, name:"reboot", service:"palm://com.palm.power/shutdown/", method:"machineReboot"
+			 	kind:enyo.PalmService, name:"reboot", service:"palm://com.webos.service.sleep/shutdown/", method:"machineReboot"
 		 }
 	],
 	
@@ -413,7 +413,7 @@ enyo.kind({
 		this.params = enyo.windowParams;
 		this.tappedOnButton = false;
 		if(this.params.errorType == "dbError" || this.params.errorType == "fsckError" ) {
-			this.$.alertTitle.setContent($L("Restore Required"));			
+			this.$.alertTitle.setContent($L("Restore Required"));
 			this.$.alertMsg.setContent($L("You need to restart your device. After restart, sign in to your webOS Account to restore backed up data."));			
 		}
 		else {
