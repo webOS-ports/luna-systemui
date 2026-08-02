@@ -10,7 +10,7 @@ set -euo pipefail
 # component, so shipping everything (not just recently-touched files) keeps a fresh install and an
 # upgrade identical instead of depending on accumulated history.
 #
-# <pkg-name> scopes the staging path per package (/opt/luna-systemui-overwrite/<pkg-name>/...) --
+# <pkg-name> scopes the staging path per package (/media/cryptofs/luna-systemui-overwrite/<pkg-name>/...) --
 # without this, every package's payload/appinfo.json, payload/depends.js, dest.txt etc. would all
 # land at the exact same shared path, and ipkg treats two packages both shipping the same tracked
 # filename as a hard conflict (confirmed live installing accounts then phone).
@@ -23,7 +23,7 @@ set -euo pipefail
 stage_whole() {
   local src="$1" dst="$2" name="$3"; shift 3 || true
   [ -d "$src" ] || { echo "!! stage_whole: $src missing" >&2; exit 1; }
-  local ov="$STAGE/opt/luna-systemui-overwrite/$name"
+  local ov="$STAGE/media/cryptofs/luna-systemui-overwrite/$name"
   mkdir -p "$ov"
   echo "$dst" > "$ov/dest.txt"
   mkdir -p "$ov/payload"

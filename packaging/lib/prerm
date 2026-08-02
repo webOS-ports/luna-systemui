@@ -2,7 +2,7 @@
 # Shared prerm for every luna-systemui package built by this packaging/ tree -- restores the whole
 # directory postinst backed up (as a single tar), or removes it if it never existed on stock.
 # prerm runs BEFORE ipkg deletes this package's own tracked files, so
-# /opt/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is still present
+# /media/cryptofs/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is still present
 # and readable here.
 set +e
 BAK_ROOT=/media/cryptofs/luna-systemui-backup
@@ -12,7 +12,7 @@ mount -o remount,rw /dev/mapper/store-root / 2>/dev/null
 mount -o remount,rw / 2>/dev/null
 
 OV=""
-for d in /opt/luna-systemui-overwrite/*/; do
+for d in /media/cryptofs/luna-systemui-overwrite/*/; do
   [ -f "${d}dest.txt" ] && OV="${d%/}" && break
 done
 
