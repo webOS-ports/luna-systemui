@@ -59,6 +59,16 @@ if [ -n "$PRESERVE_TMP" ]; then
   done < "$OV/preserve.txt"
   rm -rf "$PRESERVE_TMP"
 fi
+
+# Recreate any symlinks stage_whole had to leave out of the payload (cryptofs, where the payload
+# was staged, rejects symlink() outright) -- $DST is on root fs, which supports them fine.
+if [ -s "$OV/symlinks.txt" ]; then
+  while IFS="$(printf '\t')" read -r relpath target; do
+    [ -n "$relpath" ] || continue
+    mkdir -p "$DST/$(dirname "$relpath")"
+    ln -sf "$target" "$DST/$relpath"
+  done < "$OV/symlinks.txt"
+fi
 log "installed $DST"
 
 # Clean up our own staged copy now that it's been applied -- if left in place, a LATER package's

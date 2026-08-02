@@ -36,6 +36,21 @@ stage_whole() {
     excludes+=(--exclude="$p")
     echo "$p" >> "$ov/preserve.txt"
   done
+
+  # Symlinks can't be staged through the payload at all: /media/cryptofs is a FUSE mount that
+  # rejects symlink() outright ("Operation not permitted", confirmed live packaging
+  # messaging.library's version/1.0 -> ../submission/1.3). Record them separately and exclude
+  # their paths from the tar; postinst recreates them with a real ln -s at the final (root-fs,
+  # symlink-capable) destination after copying the rest of the payload there.
+  : > "$ov/symlinks.txt"
+  local link relpath target
+  while IFS= read -r -d '' link; do
+    relpath="${link#"$src"/}"
+    target="$(readlink "$link")"
+    printf '%s\t%s\n' "$relpath" "$target" >> "$ov/symlinks.txt"
+    excludes+=(--exclude="$relpath")
+  done < <(find "$src" -type l -print0)
+
   tar -C "$src" "${excludes[@]}" -cf - . \
     | tar -C "$ov/payload" -xf -
 }
