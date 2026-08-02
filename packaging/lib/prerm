@@ -1,0 +1,63 @@
+#!/bin/sh
+# Shared prerm for every luna-systemui package built by this packaging/ tree -- restores the whole
+# directory postinst backed up (as a single tar), or removes it if it never existed on stock.
+# prerm runs BEFORE ipkg deletes this package's own tracked files, so
+# /opt/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is still present
+# and readable here.
+set +e
+BAK_ROOT=/media/cryptofs/luna-systemui-backup
+log() { echo "[luna-systemui] $*"; }
+
+mount -o remount,rw /dev/mapper/store-root / 2>/dev/null
+mount -o remount,rw / 2>/dev/null
+
+OV=""
+for d in /opt/luna-systemui-overwrite/*/; do
+  [ -f "${d}dest.txt" ] && OV="${d%/}" && break
+done
+
+if [ -n "$OV" ]; then
+  DST="$(cat "$OV/dest.txt")"
+  BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
+
+  # Carry any live runtime data (see postinst) across the restore/removal too, instead of
+  # reverting it to whatever the stock backup tar happened to hold at first-install time.
+  PRESERVE_TMP=""
+  if [ -s "$OV/preserve.txt" ]; then
+    PRESERVE_TMP="$(mktemp -d)"
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      if [ -e "$DST/$rel" ]; then
+        mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
+        mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+      fi
+    done < "$OV/preserve.txt"
+  fi
+
+  rm -rf "$DST"
+  if [ -f "$BAK" ]; then
+    ( cd "$(dirname "$DST")" && tar xf "$BAK" )
+    rm -f "$BAK"
+    log "restored stock $DST"
+  else
+    log "removed $DST (was never on stock)"
+  fi
+
+  if [ -n "$PRESERVE_TMP" ]; then
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      if [ -e "$PRESERVE_TMP/$rel" ]; then
+        mkdir -p "$DST/$(dirname "$rel")"
+        rm -rf "$DST/$rel"
+        mv "$PRESERVE_TMP/$rel" "$DST/$rel"
+      fi
+    done < "$OV/preserve.txt"
+    rm -rf "$PRESERVE_TMP"
+  fi
+fi
+
+luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1
+
+# Deliberately NOT remounting root back to read-only here -- same reasoning as postinst.
+log "removal complete."
+exit 0

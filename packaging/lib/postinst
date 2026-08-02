@@ -1,0 +1,76 @@
+#!/bin/sh
+# Shared postinst for every luna-systemui package built by this packaging/ tree. Each package stages
+# its whole app/framework directory under /opt/luna-systemui-overwrite/<pkg-name>/payload/ plus a
+# dest.txt naming the real absolute path it replaces (a single ipk only ever ships ONE such
+# subdirectory -- the per-package name just keeps multiple packages' payloads from colliding on
+# the same tracked filename at the ipkg level). Backs up whatever's currently there (once, as a
+# single tar -- not per-file: these are whole-directory replacements, not surgical patches) so
+# prerm can restore it, then replaces the whole directory with this package's payload.
+set +e
+BAK_ROOT=/media/cryptofs/luna-systemui-backup
+log() { echo "[luna-systemui] $*"; }
+
+mount -o remount,rw /dev/mapper/store-root / 2>/dev/null
+mount -o remount,rw / 2>/dev/null
+
+OV=""
+for d in /opt/luna-systemui-overwrite/*/; do
+  [ -f "${d}dest.txt" ] && OV="${d%/}" && break
+done
+[ -n "$OV" ] || { echo "!! no /opt/luna-systemui-overwrite/*/dest.txt found, nothing to install" >&2; exit 1; }
+
+DST="$(cat "$OV/dest.txt")"
+BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
+
+mkdir -p "$BAK_ROOT"
+if [ -d "$DST" ] && [ ! -f "$BAK" ]; then
+  ( cd "$(dirname "$DST")" && tar cf "$BAK" "$(basename "$DST")" ) \
+    && log "backed up stock $DST -> $BAK"
+fi
+
+# Some services (e.g. contacts.linker's filecache_types/{contactphoto,contactvcard} contact-photo
+# cache) keep LIVE RUNTIME DATA inside the same directory as their code. preserve.txt (written by
+# stage_whole) lists those subpaths -- move them out of the way before the wholesale rm -rf/replace
+# below, then back in afterward, instead of destroying them.
+PRESERVE_TMP=""
+if [ -s "$OV/preserve.txt" ]; then
+  PRESERVE_TMP="$(mktemp -d)"
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    if [ -e "$DST/$rel" ]; then
+      mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
+      mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+    fi
+  done < "$OV/preserve.txt"
+fi
+
+rm -rf "$DST"
+mkdir -p "$(dirname "$DST")"
+cp -r "$OV/payload" "$DST"
+
+if [ -n "$PRESERVE_TMP" ]; then
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    if [ -e "$PRESERVE_TMP/$rel" ]; then
+      mkdir -p "$DST/$(dirname "$rel")"
+      rm -rf "$DST/$rel"
+      mv "$PRESERVE_TMP/$rel" "$DST/$rel"
+    fi
+  done < "$OV/preserve.txt"
+  rm -rf "$PRESERVE_TMP"
+fi
+log "installed $DST"
+
+# Clean up our own staged copy now that it's been applied -- if left in place, a LATER package's
+# postinst glob (/opt/luna-systemui-overwrite/*/dest.txt) would find this STALE subdirectory before
+# its own freshly-extracted one and silently reinstall the WRONG payload (see core-apps packaging/
+# for the confirmed-live failure mode this guards against).
+rm -rf "$OV"
+
+# Nudge anything that might have this cached to reload.
+luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1
+
+# Deliberately NOT remounting root back to read-only here -- ipkg writes its own bookkeeping after
+# postinst returns, and that needs root writable too.
+log "install complete. Restart the UI to pick up patched app/framework JS: stop LunaSysMgr; start LunaSysMgr"
+exit 0
