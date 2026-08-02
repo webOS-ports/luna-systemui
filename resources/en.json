@@ -1,0 +1,9 @@
+{
+	"Airplane Mode": "Aeroplane Mode",
+	"Allow #{application} to access photos, videos, and music on your device?": "Allow #{application} to access photos, videos and music on your device?",
+	"Device May Not Charge": "Device may not charge",
+	"Don't Allow": "Do Not Allow",
+	"No data was recoverable. The USB drive has been reformatted. <br> Always eject your device from your desktop computer before disconnecting.": "No data was recoverable. The USB drive has been re-formatted. <br> Always eject your device from your desktop computer before disconnecting.",
+	"Turn off Airplane Mode": "Turn off Aeroplane Mode",
+	"Your device is connected to a charging source that provides less than the recommended voltage or current. To reliably charge, use the power adapter and USB cable that came with your device.": "Your device is connected to a charging source that provides less than the recommended voltage or current. To reliably charge, use the power adapter and USB cable for your device."
+}

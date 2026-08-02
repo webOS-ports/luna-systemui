@@ -1,0 +1,11 @@
+{
+	"icon": "../../icon.png",
+	"id": "com.palm.systemui",
+	"main": "../../index.html",
+	"noWindow": true,
+	"splashicon": "../../icon-256x256.png",
+	"title": "Barra di stato",
+	"type": "web",
+	"vendor": "Palm",
+	"version": "1.0.0"
+}
