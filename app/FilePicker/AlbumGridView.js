@@ -123,6 +123,11 @@ enyo.kind({
 		var inQuery = {};
 		inQuery.where = [{prop: 'albumId', op: '=', val: albumGuid}, {prop: "appCacheComplete", op: "=", val: true}];
 		inQuery.select = ["_id", "albumId", "appCacheComplete", "path", "mediaType", "appGridThumbnail"];
+		// webOS: show the NEWEST captures first (e.g. Screen captures), not oldest-first. The records'
+		// createdTime is 0, so we can't order by it; instead reverse the album index scan with desc.
+		// Screenshots are indexed by the media indexer as they're taken, so newest _id == newest
+		// capture, and desc:true flips the default oldest-first order to newest-first.
+		inQuery.desc = true;
 		return this.$.db.call({query: inQuery});
 	},
 	dbQueryResponse: function(inSender, inResponse, inRequest) {
