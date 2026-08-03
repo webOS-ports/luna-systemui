@@ -78,6 +78,23 @@ printf '2.0\n' > "$WORK/debian-binary"
 mkdir -p "$OUT"
 IPK="$OUT/${PKG_ID}_${PKG_VERSION}_all.ipk"
 rm -f "$IPK"
-( cd "$WORK" && ar rc "$IPK" debian-binary control.tar.gz data.tar.gz )
+# ---------------------------------------------------------------- pmPostInstall.script / pmPreRemove.script
+# Preware / WebOS Quick Install don't actually run control.tar.gz's own postinst/prerm at all --
+# confirmed live via /var/log/messages: ApplicationInstallerUtility invokes
+# `ipkg -o /media/cryptofs/apps -force-overwrite install <ipk>`, and ipkg's own offline-root mode
+# explicitly SKIPS running the package's postinst/prerm ("offline root mode: not running
+# <pkg>.postinst"). Instead it runs a separate, older Palm-package convention: top-level ar
+# members named pmPostInstall.script / pmPreRemove.script (siblings of control.tar.gz/data.tar.gz
+# -- confirmed present in real stock ipks, e.g. com.palm.quickofficeservicegenerator's own
+# pmPostInstall.script), copied out and run via `sh -c` after/before the ipkg step. Reuse the
+# exact same postinst/prerm content here: the logic is identical either way, since the shared
+# postinst/prerm this repo ships already check BOTH the direct-root and the
+# /media/cryptofs/apps-prefixed offline-root location for their staged $OV.
+[ -n "$POSTINST_SRC" ] && [ -f "$POSTINST_SRC" ] && cp "$POSTINST_SRC" "$WORK/pmPostInstall.script" && chmod 755 "$WORK/pmPostInstall.script"
+[ -n "$PRERM_SRC" ] && [ -f "$PRERM_SRC" ] && cp "$PRERM_SRC" "$WORK/pmPreRemove.script" && chmod 755 "$WORK/pmPreRemove.script"
+
+( cd "$WORK" && ar rc "$IPK" debian-binary control.tar.gz data.tar.gz \
+    $( [ -f pmPostInstall.script ] && echo pmPostInstall.script ) \
+    $( [ -f pmPreRemove.script ] && echo pmPreRemove.script ) )
 
 echo "built $IPK ($(du -h "$IPK" | cut -f1))"
