@@ -26,7 +26,6 @@ stage_whole() {
   local ov="$STAGE/media/cryptofs/luna-systemui-overwrite/$name"
   mkdir -p "$ov"
   echo "$dst" > "$ov/dest.txt"
-  mkdir -p "$ov/payload"
   : > "$ov/preserve.txt"
   local excludes=(--exclude=spec --exclude=mock --exclude=test --exclude=Gemfile
     --exclude=Gemfile.lock --exclude=Rakefile --exclude=ci_build.sh --exclude=run_tests.sh
@@ -51,6 +50,13 @@ stage_whole() {
     excludes+=(--exclude="$relpath")
   done < <(find "$src" -type l -print0)
 
-  tar -C "$src" "${excludes[@]}" -cf - . \
-    | tar -C "$ov/payload" -xf -
+  # --owner=0 --group=0: built on a dev machine under a regular user account, and GNU tar
+  # on-device tries to restore the archive's recorded ownership on extraction as root by default --
+  # confirmed live (core-apps packaging) this fails per-file on cryptofs and measurably slows
+  # extraction. Store everything as root instead (postinst's --no-same-owner belt-and-suspenders
+  # the same fix on the extraction side). Ship the payload as ONE tarball, not thousands of loose
+  # files in data.tar.gz: confirmed live that ipkg's own offline-root extraction of ~2800 loose
+  # files took ~139s, vs ~13s for a single-file data.tar.gz -- ipkg's own per-file bookkeeping (not
+  # raw cryptofs FUSE throughput) is the bottleneck.
+  tar -C "$src" "${excludes[@]}" --owner=0 --group=0 -czf "$ov/payload.tar.gz" .
 }

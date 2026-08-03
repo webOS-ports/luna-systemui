@@ -30,7 +30,21 @@ if [ -z "$OV" ]; then
     [ -f "${d}dest.txt" ] && OV="${d%/}" && break
   done
 fi
-[ -n "$OV" ] || { echo "!! no luna-systemui-overwrite/*/dest.txt found (checked direct + offline-root paths), nothing to install" >&2; exit 1; }
+# WebOSQuickInstall (confirmed live) runs this SAME pmPostInstall.script a second time itself,
+# after the real App-Installer-driven install already ran it once and cleaned up $OV -- a second
+# run legitimately finds nothing staged, which used to be a hard error here ("no dest.txt found").
+# That's not a real failure, just harmless redundancy: LASTDEST (written on success below, and
+# NEVER cleaned up like $OV is) records where we last installed this exact PKGID. If it says we
+# already installed successfully and that destination still exists, this is a no-op, not an error.
+LASTDEST="/media/cryptofs/luna-systemui-overwrite/.last-installed/$PKGID.dest.txt"
+if [ -z "$OV" ]; then
+  if [ -n "$PKGID" ] && [ -f "$LASTDEST" ] && [ -d "$(cat "$LASTDEST")" ]; then
+    log "nothing newly staged for $PKGID -- already installed at $(cat "$LASTDEST"), treating as a no-op"
+    exit 0
+  fi
+  echo "!! no luna-systemui-overwrite/*/dest.txt found (checked direct + offline-root paths), nothing to install" >&2
+  exit 1
+fi
 
 DST="$(cat "$OV/dest.txt")"
 BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
@@ -58,8 +72,8 @@ if [ -s "$OV/preserve.txt" ]; then
 fi
 
 rm -rf "$DST"
-mkdir -p "$(dirname "$DST")"
-cp -r "$OV/payload" "$DST"
+mkdir -p "$DST"
+tar -C "$DST" --no-same-owner -xzf "$OV/payload.tar.gz"
 
 if [ -n "$PRESERVE_TMP" ]; then
   while IFS= read -r rel; do
@@ -83,6 +97,14 @@ if [ -s "$OV/symlinks.txt" ]; then
   done < "$OV/symlinks.txt"
 fi
 log "installed $DST"
+
+# Record where we just installed, OUTSIDE $OV (which is about to be wiped below) -- this is what
+# lets a redundant second invocation (see WebOSQuickInstall comment above) recognize "already done"
+# instead of misreporting a real failure.
+if [ -n "$PKGID" ]; then
+  mkdir -p "$(dirname "$LASTDEST")"
+  echo "$DST" > "$LASTDEST"
+fi
 
 # Clean up our own staged copy now that it's been applied -- if left in place, a LATER package's
 # postinst glob (/media/cryptofs/luna-systemui-overwrite/*/dest.txt) would find this STALE subdirectory before
