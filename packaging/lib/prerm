@@ -11,10 +11,23 @@ log() { echo "[luna-systemui] $*"; }
 mount -o remount,rw /dev/mapper/store-root / 2>/dev/null
 mount -o remount,rw / 2>/dev/null
 
+case "$0" in
+  */pmPreRemove.script) PKGID="$(basename "$(dirname "$0")")" ;;
+  *.prerm) PKGID="$(basename "$0" .prerm)" ;;
+  *) PKGID="" ;;
+esac
+
 OV=""
-for d in /media/cryptofs/luna-systemui-overwrite/*/ /media/cryptofs/apps/media/cryptofs/luna-systemui-overwrite/*/; do
-  [ -f "${d}dest.txt" ] && OV="${d%/}" && break
-done
+if [ -n "$PKGID" ]; then
+  for base in /media/cryptofs/luna-systemui-overwrite /media/cryptofs/apps/media/cryptofs/luna-systemui-overwrite; do
+    [ -f "$base/$PKGID/dest.txt" ] && OV="$base/$PKGID" && break
+  done
+fi
+if [ -z "$OV" ]; then
+  for d in /media/cryptofs/luna-systemui-overwrite/*/ /media/cryptofs/apps/media/cryptofs/luna-systemui-overwrite/*/; do
+    [ -f "${d}dest.txt" ] && OV="${d%/}" && break
+  done
+fi
 
 if [ -n "$OV" ]; then
   DST="$(cat "$OV/dest.txt")"
