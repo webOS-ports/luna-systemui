@@ -78,6 +78,25 @@ if [ -f "$OV/files.txt" ]; then
   fi
   mkdir -p "$DST"
   tar -C "$DST" --no-same-owner -xzf "$OV/files.tar.gz"
+  TAR_STATUS=$?
+  # Same corrupted/truncated-transfer risk as whole-dir mode below (this whole script runs under
+  # `set +e`, so a bad transfer would otherwise silently "succeed" with partial/no files patched).
+  # Surgical mode never rm -rf's $DST first, so roll back only the specific files this package
+  # touches: restore them from $BAK if anything existed before, or just remove whatever this failed
+  # extraction partially wrote if $BAK is the empty "nothing existed" marker.
+  if [ "$TAR_STATUS" -ne 0 ]; then
+    echo "!! extraction of $OV/files.tar.gz into $DST failed (tar exit $TAR_STATUS) - likely a corrupted/truncated transfer" >&2
+    if [ -s "$BAK" ]; then
+      tar -C "$DST" -xf "$BAK" && log "rolled back to previously-backed-up file(s) under $DST"
+    else
+      while IFS= read -r rel; do
+        [ -n "$rel" ] || continue
+        rm -f "$DST/$rel"
+      done < "$OV/files.txt"
+      log "removed partially-written new file(s) under $DST (none existed before this install)"
+    fi
+    exit 1
+  fi
   log "patched $(wc -l < "$OV/files.txt") file(s) under $DST"
 else
   # Whole-dir mode (stage_whole): back up the entire directory once (as a single tar) so prerm
@@ -107,6 +126,27 @@ else
   rm -rf "$DST"
   mkdir -p "$DST"
   tar -C "$DST" --no-same-owner -xzf "$OV/payload.tar.gz"
+  TAR_STATUS=$?
+
+  # This whole script runs under `set +e` (a failed step shouldn't abort a postinst mid-way
+  # through other packages' installs), which means a corrupted/truncated payload.tar.gz (confirmed
+  # live elsewhere in this project family: a bad transfer left a package silently "installed" into
+  # an EMPTY directory - ipkg and this script both reported success) would otherwise go completely
+  # unnoticed. Explicitly check both tar's own exit status AND that extraction actually produced
+  # something (a truncated-but-still-gzip-valid archive can exit 0 with partial content) - roll
+  # back to the pre-install backup if we have one, so a bad transfer leaves the previous working
+  # install in place instead of a broken empty directory, and fail loudly either way instead of
+  # silently recording success. PRESERVE_TMP's content isn't restored here on failure - $BAK
+  # already holds a full snapshot of $DST (preserved data included) from just before this install.
+  if [ "$TAR_STATUS" -ne 0 ] || [ -z "$(ls -A "$DST" 2>/dev/null)" ]; then
+    echo "!! extraction of $OV/payload.tar.gz into $DST failed (tar exit $TAR_STATUS, $([ -z "$(ls -A "$DST" 2>/dev/null)" ] && echo empty || echo non-empty) result) - likely a corrupted/truncated transfer" >&2
+    [ -n "$PRESERVE_TMP" ] && rm -rf "$PRESERVE_TMP"
+    if [ -f "$BAK" ]; then
+      rm -rf "$DST"
+      ( cd "$(dirname "$DST")" && tar xf "$BAK" ) && log "rolled back to pre-install backup at $DST"
+    fi
+    exit 1
+  fi
 
   if [ -n "$PRESERVE_TMP" ]; then
     while IFS= read -r rel; do
