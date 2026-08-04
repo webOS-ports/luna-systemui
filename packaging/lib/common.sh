@@ -60,3 +60,31 @@ stage_whole() {
   # raw cryptofs FUSE throughput) is the bottleneck.
   tar -C "$src" "${excludes[@]}" --owner=0 --group=0 -czf "$ov/payload.tar.gz" .
 }
+
+# stage_files <src-dir> <dest-absolute-path> <pkg-name> <rel-file> [rel-file ...]
+# Surgical alternative to stage_whole: stages only the given relative files (patched content),
+# not the whole directory. Use this when most installs already have some existing (possibly
+# third-party-patched) copy of <dest-absolute-path> on device -- a whole-directory replace would
+# silently discard whatever else is patched there. postinst backs up (once) only the specific
+# files this package is about to touch that currently exist, and overwrites/creates just those;
+# prerm restores exactly that backup and deletes any file this package created that had no prior
+# backup (i.e. didn't exist before this package touched it), leaving everything else in <dest>
+# untouched either way.
+#
+# <pkg-name> scoping and the on-device tar/no-same-owner reasoning are the same as stage_whole
+# above. files.txt (surgical mode) vs payload.tar.gz (whole-dir mode) is how postinst/prerm tell
+# the two modes apart.
+stage_files() {
+  local src="$1" dst="$2" name="$3"; shift 3
+  [ "$#" -gt 0 ] || { echo "!! stage_files: no files given" >&2; exit 1; }
+  local ov="$STAGE/media/cryptofs/luna-systemui-overwrite/$name"
+  mkdir -p "$ov"
+  echo "$dst" > "$ov/dest.txt"
+  : > "$ov/files.txt"
+  local rel
+  for rel in "$@"; do
+    [ -f "$src/$rel" ] || { echo "!! stage_files: $src/$rel missing" >&2; exit 1; }
+    echo "$rel" >> "$ov/files.txt"
+  done
+  tar -C "$src" --owner=0 --group=0 -czf "$ov/files.tar.gz" -T "$ov/files.txt"
+}

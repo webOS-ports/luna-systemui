@@ -1,11 +1,17 @@
 #!/bin/sh
-# Shared postinst for every luna-systemui package built by this packaging/ tree. Each package stages
-# its whole app/framework directory under /media/cryptofs/luna-systemui-overwrite/<pkg-name>/payload/ plus a
-# dest.txt naming the real absolute path it replaces (a single ipk only ever ships ONE such
-# subdirectory -- the per-package name just keeps multiple packages' payloads from colliding on
-# the same tracked filename at the ipkg level). Backs up whatever's currently there (once, as a
-# single tar -- not per-file: these are whole-directory replacements, not surgical patches) so
-# prerm can restore it, then replaces the whole directory with this package's payload.
+# Shared postinst for every luna-systemui package built by this packaging/ tree. Each package
+# stages its payload under /media/cryptofs/luna-systemui-overwrite/<pkg-name>/ plus a dest.txt
+# naming the real absolute path it patches (a single ipk only ever ships ONE such subdirectory --
+# the per-package name just keeps multiple packages' payloads from colliding on the same tracked
+# filename at the ipkg level). Two staging modes, told apart by which manifest is present:
+#   - files.txt + files.tar.gz (stage_files): surgical -- back up (once) and overwrite only the
+#     specific files this package touches, leaving everything else already under dest.txt (e.g.
+#     someone else's separate patches) untouched. Use this whenever most installs already have
+#     SOME existing copy of the target on device.
+#   - payload.tar.gz (stage_whole): whole-directory replace -- back up the whole directory once
+#     (as a single tar) and replace it wholesale. Use this when the repo is the single source of
+#     truth for the whole component.
+# Either way, prerm restores exactly what this postinst backed up.
 set +e
 BAK_ROOT=/media/cryptofs/luna-systemui-backup
 log() { echo "[luna-systemui] $*"; }
@@ -47,54 +53,82 @@ if [ -z "$OV" ]; then
 fi
 
 DST="$(cat "$OV/dest.txt")"
-BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
-
 mkdir -p "$BAK_ROOT"
-if [ -d "$DST" ] && [ ! -f "$BAK" ]; then
-  ( cd "$(dirname "$DST")" && tar cf "$BAK" "$(basename "$DST")" ) \
-    && log "backed up stock $DST -> $BAK"
-fi
 
-# Some services (e.g. contacts.linker's filecache_types/{contactphoto,contactvcard} contact-photo
-# cache) keep LIVE RUNTIME DATA inside the same directory as their code. preserve.txt (written by
-# stage_whole) lists those subpaths -- move them out of the way before the wholesale rm -rf/replace
-# below, then back in afterward, instead of destroying them.
-PRESERVE_TMP=""
-if [ -s "$OV/preserve.txt" ]; then
-  PRESERVE_TMP="$(mktemp -d)"
-  while IFS= read -r rel; do
-    [ -n "$rel" ] || continue
-    if [ -e "$DST/$rel" ]; then
-      mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
-      mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+if [ -f "$OV/files.txt" ]; then
+  # Surgical mode (stage_files): back up (once) only the specific files this package is about to
+  # touch that currently exist, then overwrite/create just those. Everything else already under
+  # $DST -- including a user's own separate third-party patches -- is left alone, unlike whole-dir
+  # mode below which would silently discard it.
+  BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_')_${PKGID}.files.tar"
+  BAK_MANIFEST="${BAK}.manifest"
+  if [ ! -f "$BAK" ]; then
+    : > "$BAK_MANIFEST"
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      [ -e "$DST/$rel" ] && echo "$rel" >> "$BAK_MANIFEST"
+    done < "$OV/files.txt"
+    if [ -s "$BAK_MANIFEST" ]; then
+      ( cd "$DST" && tar cf "$BAK" -T "$BAK_MANIFEST" ) \
+        && log "backed up $(wc -l < "$BAK_MANIFEST") existing file(s) under $DST -> $BAK"
+    else
+      : > "$BAK"
+      log "no existing files to back up under $DST (all new)"
     fi
-  done < "$OV/preserve.txt"
-fi
+  fi
+  mkdir -p "$DST"
+  tar -C "$DST" --no-same-owner -xzf "$OV/files.tar.gz"
+  log "patched $(wc -l < "$OV/files.txt") file(s) under $DST"
+else
+  # Whole-dir mode (stage_whole): back up the entire directory once (as a single tar) so prerm
+  # can restore it, then replace it wholesale.
+  BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
+  if [ -d "$DST" ] && [ ! -f "$BAK" ]; then
+    ( cd "$(dirname "$DST")" && tar cf "$BAK" "$(basename "$DST")" ) \
+      && log "backed up stock $DST -> $BAK"
+  fi
 
-rm -rf "$DST"
-mkdir -p "$DST"
-tar -C "$DST" --no-same-owner -xzf "$OV/payload.tar.gz"
+  # Some services (e.g. contacts.linker's filecache_types/{contactphoto,contactvcard} contact-photo
+  # cache) keep LIVE RUNTIME DATA inside the same directory as their code. preserve.txt (written by
+  # stage_whole) lists those subpaths -- move them out of the way before the wholesale rm -rf/replace
+  # below, then back in afterward, instead of destroying them.
+  PRESERVE_TMP=""
+  if [ -s "$OV/preserve.txt" ]; then
+    PRESERVE_TMP="$(mktemp -d)"
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      if [ -e "$DST/$rel" ]; then
+        mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
+        mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+      fi
+    done < "$OV/preserve.txt"
+  fi
 
-if [ -n "$PRESERVE_TMP" ]; then
-  while IFS= read -r rel; do
-    [ -n "$rel" ] || continue
-    if [ -e "$PRESERVE_TMP/$rel" ]; then
-      mkdir -p "$DST/$(dirname "$rel")"
-      rm -rf "$DST/$rel"
-      mv "$PRESERVE_TMP/$rel" "$DST/$rel"
-    fi
-  done < "$OV/preserve.txt"
-  rm -rf "$PRESERVE_TMP"
-fi
+  rm -rf "$DST"
+  mkdir -p "$DST"
+  tar -C "$DST" --no-same-owner -xzf "$OV/payload.tar.gz"
 
-# Recreate any symlinks stage_whole had to leave out of the payload (cryptofs, where the payload
-# was staged, rejects symlink() outright) -- $DST is on root fs, which supports them fine.
-if [ -s "$OV/symlinks.txt" ]; then
-  while IFS="$(printf '\t')" read -r relpath target; do
-    [ -n "$relpath" ] || continue
-    mkdir -p "$DST/$(dirname "$relpath")"
-    ln -sf "$target" "$DST/$relpath"
-  done < "$OV/symlinks.txt"
+  if [ -n "$PRESERVE_TMP" ]; then
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      if [ -e "$PRESERVE_TMP/$rel" ]; then
+        mkdir -p "$DST/$(dirname "$rel")"
+        rm -rf "$DST/$rel"
+        mv "$PRESERVE_TMP/$rel" "$DST/$rel"
+      fi
+    done < "$OV/preserve.txt"
+    rm -rf "$PRESERVE_TMP"
+  fi
+
+  # Recreate any symlinks stage_whole had to leave out of the payload (cryptofs, where the payload
+  # was staged, rejects symlink() outright) -- $DST is on root fs, which supports them fine.
+  if [ -s "$OV/symlinks.txt" ]; then
+    while IFS="$(printf '\t')" read -r relpath target; do
+      [ -n "$relpath" ] || continue
+      mkdir -p "$DST/$(dirname "$relpath")"
+      ln -sf "$target" "$DST/$relpath"
+    done < "$OV/symlinks.txt"
+  fi
 fi
 log "installed $DST"
 

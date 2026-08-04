@@ -1,9 +1,10 @@
 #!/bin/sh
-# Shared prerm for every luna-systemui package built by this packaging/ tree -- restores the whole
-# directory postinst backed up (as a single tar), or removes it if it never existed on stock.
-# prerm runs BEFORE ipkg deletes this package's own tracked files, so
-# /media/cryptofs/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is still present
-# and readable here.
+# Shared prerm for every luna-systemui package built by this packaging/ tree -- restores exactly
+# what the matching postinst backed up (see postinst's own header for the two staging modes:
+# stage_files' surgical per-file patch vs stage_whole's whole-directory replace). prerm runs
+# BEFORE ipkg deletes this package's own tracked files, so
+# /media/cryptofs/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is
+# still present and readable here.
 set +e
 BAK_ROOT=/media/cryptofs/luna-systemui-backup
 log() { echo "[luna-systemui] $*"; }
@@ -31,41 +32,71 @@ fi
 
 if [ -n "$OV" ]; then
   DST="$(cat "$OV/dest.txt")"
-  BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
 
-  # Carry any live runtime data (see postinst) across the restore/removal too, instead of
-  # reverting it to whatever the stock backup tar happened to hold at first-install time.
-  PRESERVE_TMP=""
-  if [ -s "$OV/preserve.txt" ]; then
-    PRESERVE_TMP="$(mktemp -d)"
+  if [ -f "$OV/files.txt" ]; then
+    # Surgical mode: only touch the specific files this package patched. NEVER rm -rf $DST here --
+    # unlike whole-dir mode, $DST is not this package's exclusive content.
+    BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_')_${PKGID}.files.tar"
+    BAK_MANIFEST="${BAK}.manifest"
+    if [ -f "$BAK" ] && [ -s "$BAK" ] && [ -f "$BAK_MANIFEST" ]; then
+      ( cd "$DST" && tar xf "$BAK" )
+      log "restored $(wc -l < "$BAK_MANIFEST") file(s) under $DST"
+    fi
+    # Any file this package shipped that ISN'T in the backup manifest didn't exist before this
+    # package touched it -- delete it (a stock/prior tar would never have had it either). Plain
+    # POSIX line comparison, not grep -x: on-device grep is BusyBox, which has no -x (exact whole
+    # line match) at all.
     while IFS= read -r rel; do
       [ -n "$rel" ] || continue
-      if [ -e "$DST/$rel" ]; then
-        mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
-        mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+      FOUND=0
+      if [ -f "$BAK_MANIFEST" ]; then
+        while IFS= read -r mrel; do
+          [ "$mrel" = "$rel" ] && FOUND=1 && break
+        done < "$BAK_MANIFEST"
       fi
-    done < "$OV/preserve.txt"
-  fi
-
-  rm -rf "$DST"
-  if [ -f "$BAK" ]; then
-    ( cd "$(dirname "$DST")" && tar xf "$BAK" )
-    rm -f "$BAK"
-    log "restored stock $DST"
+      if [ "$FOUND" = "0" ]; then
+        rm -f "$DST/$rel"
+      fi
+    done < "$OV/files.txt"
+    rm -f "$BAK" "$BAK_MANIFEST"
+    log "removed patched file(s) under $DST that had no prior backup"
   else
-    log "removed $DST (was never on stock)"
-  fi
+    BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
 
-  if [ -n "$PRESERVE_TMP" ]; then
-    while IFS= read -r rel; do
-      [ -n "$rel" ] || continue
-      if [ -e "$PRESERVE_TMP/$rel" ]; then
-        mkdir -p "$DST/$(dirname "$rel")"
-        rm -rf "$DST/$rel"
-        mv "$PRESERVE_TMP/$rel" "$DST/$rel"
-      fi
-    done < "$OV/preserve.txt"
-    rm -rf "$PRESERVE_TMP"
+    # Carry any live runtime data (see postinst) across the restore/removal too, instead of
+    # reverting it to whatever the stock backup tar happened to hold at first-install time.
+    PRESERVE_TMP=""
+    if [ -s "$OV/preserve.txt" ]; then
+      PRESERVE_TMP="$(mktemp -d)"
+      while IFS= read -r rel; do
+        [ -n "$rel" ] || continue
+        if [ -e "$DST/$rel" ]; then
+          mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
+          mv "$DST/$rel" "$PRESERVE_TMP/$rel"
+        fi
+      done < "$OV/preserve.txt"
+    fi
+
+    rm -rf "$DST"
+    if [ -f "$BAK" ]; then
+      ( cd "$(dirname "$DST")" && tar xf "$BAK" )
+      rm -f "$BAK"
+      log "restored stock $DST"
+    else
+      log "removed $DST (was never on stock)"
+    fi
+
+    if [ -n "$PRESERVE_TMP" ]; then
+      while IFS= read -r rel; do
+        [ -n "$rel" ] || continue
+        if [ -e "$PRESERVE_TMP/$rel" ]; then
+          mkdir -p "$DST/$(dirname "$rel")"
+          rm -rf "$DST/$rel"
+          mv "$PRESERVE_TMP/$rel" "$DST/$rel"
+        fi
+      done < "$OV/preserve.txt"
+      rm -rf "$PRESERVE_TMP"
+    fi
   fi
 fi
 
