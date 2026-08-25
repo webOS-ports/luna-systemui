@@ -1,11 +1,19 @@
 #!/bin/sh
 # Shared prerm for every luna-systemui package built by this packaging/ tree -- restores exactly
 # what the matching postinst backed up (see postinst's own header for the two staging modes:
-# stage_files' surgical per-file patch vs stage_whole's whole-directory replace). prerm runs
-# BEFORE ipkg deletes this package's own tracked files, so
-# /media/cryptofs/luna-systemui-overwrite/<pkg-name>/dest.txt (part of this package's payload) is
-# still present and readable here.
+# stage_files' surgical per-file patch vs stage_whole's whole-directory replace).
+#
+# NOTE: postinst deletes $OV as its last act (so a later package's glob can't find a stale
+# subdirectory), so on any normal uninstall the $OV lookups below find NOTHING -- the restore used
+# to be silently skipped, leaving the replaced component in place forever with its backup orphaned
+# (GH issue #2). Everything this script needs on that path now comes from the markers postinst
+# persists under .last-installed/ instead: <pkg-id>.dest.txt, and per-mode copies of files.txt /
+# preserve.txt.
 set +e
+# Anchor at / -- the App Installer runs this with cwd set to a directory the removal below can
+# delete; GNU tar then fails getcwd() before honouring -C and the restore "fails". See postinst's
+# matching comment (GH issue #4).
+cd /
 BAK_ROOT=/media/cryptofs/luna-systemui-backup
 log() { echo "[luna-systemui] $*"; }
 
@@ -30,10 +38,36 @@ if [ -z "$OV" ]; then
   done
 fi
 
-if [ -n "$OV" ]; then
-  DST="$(cat "$OV/dest.txt")"
+MARKDIR="/media/cryptofs/luna-systemui-overwrite/.last-installed"
+LASTDEST="$MARKDIR/$PKGID.dest.txt"
 
-  if [ -f "$OV/files.txt" ]; then
+DST=""
+[ -n "$OV" ] && DST="$(cat "$OV/dest.txt")"
+if [ -z "$DST" ] && [ -n "$PKGID" ] && [ -f "$LASTDEST" ]; then
+  DST="$(cat "$LASTDEST")"
+fi
+
+# Both sources are file contents, and the whole-dir branch below starts with rm -rf: refuse
+# anything that is not an absolute path.
+case "$DST" in /?*) ;; *) DST="" ;; esac
+
+# Per-mode manifests: prefer the staged copies in $OV (present only when prerm runs before
+# postinst ever applied, e.g. a failed install), else the marker copies postinst persisted.
+FLIST=""
+if [ -n "$OV" ] && [ -f "$OV/files.txt" ]; then
+  FLIST="$OV/files.txt"
+elif [ -n "$PKGID" ] && [ -f "$MARKDIR/$PKGID.files.txt" ]; then
+  FLIST="$MARKDIR/$PKGID.files.txt"
+fi
+PLIST=""
+if [ -n "$OV" ] && [ -s "$OV/preserve.txt" ]; then
+  PLIST="$OV/preserve.txt"
+elif [ -n "$PKGID" ] && [ -s "$MARKDIR/$PKGID.preserve.txt" ]; then
+  PLIST="$MARKDIR/$PKGID.preserve.txt"
+fi
+
+if [ -n "$DST" ]; then
+  if [ -n "$FLIST" ]; then
     # Surgical mode: only touch the specific files this package patched. NEVER rm -rf $DST here --
     # unlike whole-dir mode, $DST is not this package's exclusive content.
     BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_')_${PKGID}.files.tar"
@@ -57,7 +91,7 @@ if [ -n "$OV" ]; then
       if [ "$FOUND" = "0" ]; then
         rm -f "$DST/$rel"
       fi
-    done < "$OV/files.txt"
+    done < "$FLIST"
     rm -f "$BAK" "$BAK_MANIFEST"
     log "removed patched file(s) under $DST that had no prior backup"
   else
@@ -66,7 +100,7 @@ if [ -n "$OV" ]; then
     # Carry any live runtime data (see postinst) across the restore/removal too, instead of
     # reverting it to whatever the stock backup tar happened to hold at first-install time.
     PRESERVE_TMP=""
-    if [ -s "$OV/preserve.txt" ]; then
+    if [ -n "$PLIST" ]; then
       PRESERVE_TMP="$(mktemp -d)"
       while IFS= read -r rel; do
         [ -n "$rel" ] || continue
@@ -74,7 +108,7 @@ if [ -n "$OV" ]; then
           mkdir -p "$PRESERVE_TMP/$(dirname "$rel")"
           mv "$DST/$rel" "$PRESERVE_TMP/$rel"
         fi
-      done < "$OV/preserve.txt"
+      done < "$PLIST"
     fi
 
     rm -rf "$DST"
@@ -94,13 +128,24 @@ if [ -n "$OV" ]; then
           rm -rf "$DST/$rel"
           mv "$PRESERVE_TMP/$rel" "$DST/$rel"
         fi
-      done < "$OV/preserve.txt"
+      done < "$PLIST"
       rm -rf "$PRESERVE_TMP"
     fi
   fi
+
+  # Only now are the recorded markers expendable. Leaving them would make a SECOND uninstall call
+  # (WOSQI is known to make one) rm -rf the stock component that the first call just restored.
+  if [ -n "$PKGID" ]; then
+    rm -f "$LASTDEST" "$MARKDIR/$PKGID.files.txt" "$MARKDIR/$PKGID.preserve.txt"
+  fi
 fi
 
-luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1
+# Fire-and-forget -- NEVER wait for this one. `luna-send -n 1` blocks until applicationManager
+# replies, but under the App Installer this script runs INSIDE LunaSysMgr's own request handling,
+# so the service that owes the reply is the same one waiting for this script to exit. Nothing
+# times out, so the install chain and the UI both hang forever (GH issue #6, observed live). The
+# rescan is only a nudge -- launch it and move on.
+( luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1 & ) >/dev/null 2>&1
 
 # Deliberately NOT remounting root back to read-only here -- same reasoning as postinst.
 log "removal complete."

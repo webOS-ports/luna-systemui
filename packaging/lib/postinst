@@ -13,6 +13,13 @@
 #     truth for the whole component.
 # Either way, prerm restores exactly what this postinst backed up.
 set +e
+# The App Installer runs this script with its working directory set to the package's app directory
+# under /media/cryptofs/apps -- a directory that install/removal steps elsewhere in this script
+# family can delete out from under us. Once the cwd is gone, GNU tar fails getcwd() before it ever
+# honours -C ("tar: Cannot save working directory") and exits 2, so extraction "fails" and rolls
+# back even though the payload is fine (confirmed live in the core-apps repo, GH issue #4, where it
+# left devices with no Contacts/Messaging app). Anchor somewhere that cannot be deleted first.
+cd /
 BAK_ROOT=/media/cryptofs/luna-systemui-backup
 log() { echo "[luna-systemui] $*"; }
 
@@ -102,9 +109,20 @@ else
   # Whole-dir mode (stage_whole): back up the entire directory once (as a single tar) so prerm
   # can restore it, then replace it wholesale.
   BAK="$BAK_ROOT$(echo "$DST" | tr '/' '_').tar"
-  if [ -d "$DST" ] && [ ! -f "$BAK" ]; then
-    ( cd "$(dirname "$DST")" && tar cf "$BAK" "$(basename "$DST")" ) \
-      && log "backed up stock $DST -> $BAK"
+
+  # A one-entry tar is a backup of an empty directory: a restore point that restores nothing.
+  # Treat it as absent so it is rebuilt rather than trusted forever -- the "back up once" test
+  # below only asks whether the file exists.
+  bak_is_usable() { [ -f "$1" ] && [ "$(tar tf "$1" 2>/dev/null | head -3 | wc -l)" -gt 1 ]; }
+
+  if ! bak_is_usable "$BAK"; then
+    rm -f "$BAK"
+    if [ -d "$DST" ] && [ -n "$(ls -A "$DST" 2>/dev/null)" ]; then
+      ( cd "$(dirname "$DST")" && tar cf "$BAK" "$(basename "$DST")" ) \
+        && log "backed up stock $DST -> $BAK"
+    else
+      log "nothing complete at $DST to back up -- skipping backup rather than snapshotting emptiness"
+    fi
   fi
 
   # Some services (e.g. contacts.linker's filecache_types/{contactphoto,contactvcard} contact-photo
@@ -178,6 +196,21 @@ log "installed $DST"
 if [ -n "$PKGID" ]; then
   mkdir -p "$(dirname "$LASTDEST")"
   echo "$DST" > "$LASTDEST"
+  # Persist the per-mode manifests beside it: prerm's normal-uninstall path finds $OV already
+  # deleted (see its LASTDEST fallback), so without these copies it could not do a surgical
+  # remove-what-we-added (files.txt) or carry live runtime data across a whole-dir restore
+  # (preserve.txt).
+  MARKDIR="$(dirname "$LASTDEST")"
+  if [ -f "$OV/files.txt" ]; then
+    cp "$OV/files.txt" "$MARKDIR/$PKGID.files.txt"
+  else
+    rm -f "$MARKDIR/$PKGID.files.txt"
+  fi
+  if [ -s "$OV/preserve.txt" ]; then
+    cp "$OV/preserve.txt" "$MARKDIR/$PKGID.preserve.txt"
+  else
+    rm -f "$MARKDIR/$PKGID.preserve.txt"
+  fi
 fi
 
 # Clean up our own staged copy now that it's been applied -- if left in place, a LATER package's
@@ -187,7 +220,12 @@ fi
 rm -rf "$OV"
 
 # Nudge anything that might have this cached to reload.
-luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1
+# Fire-and-forget -- NEVER wait for this one. `luna-send -n 1` blocks until applicationManager
+# replies, but under the App Installer this script runs INSIDE LunaSysMgr's own request handling,
+# so the service that owes the reply is the same one waiting for this script to exit. Nothing
+# times out, so the install chain and the UI both hang forever (GH issue #6, observed live). The
+# rescan is only a nudge -- launch it and move on.
+( luna-send -n 1 luna://com.palm.applicationManager/rescan '{}' >/dev/null 2>&1 & ) >/dev/null 2>&1
 
 # Deliberately NOT remounting root back to read-only here -- ipkg writes its own bookkeeping after
 # postinst returns, and that needs root writable too.
