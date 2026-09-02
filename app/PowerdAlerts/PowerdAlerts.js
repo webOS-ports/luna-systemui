@@ -90,6 +90,11 @@ enyo.kind({
 	
 	create: function() {
 		this.inherited(arguments);
+		// Gives notifications.css a handle to enlarge these buttons with. Scoped
+		// to this alert rather than applied to every notification button,
+		// because the other alerts size their popups from constants that assume
+		// the stock button height.
+		this.addClass("power-menu");
 		this.inAirplaneMode = enyo.application.getSystemPreferences().airplaneMode;
 		this.$.flightmode.setContent(this.inAirplaneMode ? $L("Turn off Airplane Mode") : $L("Airplane Mode"));
 	},

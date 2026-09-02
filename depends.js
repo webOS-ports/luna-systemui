@@ -24,6 +24,7 @@ enyo.depends(
 		"data/System-Service.js",
 		"data/SysUpdateService.js",
 		"utils/utils.js",
+		"utils/uiscale.js",
 		"app/SystemUIApp.js",
 		"$enyo-lib/networkalerts/",
 		"$enyo-lib/syncui/"

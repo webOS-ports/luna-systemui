@@ -121,3 +121,41 @@ body {
   background: url(../images/palm-notification-button-info.png) no-repeat center center;
 }
 
+
+/* Power menu touch targets.
+ *
+ * The stock notification button comes out 40 css px tall, which is ~5mm on
+ * every device we ship (measured: 5.0mm on tissot, 5.4mm on mindphone) - css px
+ * are close to physically constant here, because WAM_PAGE_ZOOM_FACTOR is tuned
+ * per device. That is well under the ~9mm both Material (48dp) and iOS (44pt)
+ * treat as the minimum, and it is worst on this alert: five stacked buttons
+ * where "Shut Down" sits directly above "Cancel", so a near miss is expensive.
+ *
+ * Scoped to .power-menu on purpose. Every other alert derives its popup height
+ * from a constant that assumes the stock button, and those popups cannot be
+ * resized once open, so enlarging the buttons globally would clip them.
+ */
+.power-menu {
+	--notification-button-height: 68px;
+}
+
+.power-menu .enyo-notification-button {
+	height: var(--notification-button-height);
+	/* Centres the label. The button has no vertical centring of its own - the
+	 * child stretches and the text sits at the top of it - so the line box has
+	 * to fill the content box: the height less 6px of border-image and 4px of
+	 * padding, top and bottom. */
+	line-height: calc(var(--notification-button-height) - 20px);
+	/* So the info icon below has something to anchor against. Without it the
+	 * icon resolves right:1px against the viewport, which only looked right
+	 * because the button happens to span the full width. */
+	position: relative;
+}
+
+/* The icon is absolutely positioned off its static position, so it stayed put
+ * when the button grew and ended up hugging the top edge. Centre it instead;
+ * the -18px is half its 37px height. */
+.power-menu .info-icon {
+	top: 50%;
+	margin-top: -18px;
+}
