@@ -209,10 +209,12 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			// Measured against the rendered content: five buttons plus their
-			// margins. A popup cannot be resized once it is open, so a height
-			// that falls short simply cuts the bottom buttons off.
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 230);
+			// 370 = five buttons at --notification-button-height (68px, see
+			// stylesheets/notifications.css) plus their 3px margins, and it has
+			// to be kept in step with that value: a popup cannot be resized once
+			// it is open, so a height that is short of the content simply cuts
+			// the bottom buttons off.
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 370);
 		}
 	},
 
