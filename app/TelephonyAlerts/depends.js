@@ -17,6 +17,7 @@
 // LICENSE@@@
 
 enyo.depends(
+		"../../utils/uiscale.js",
 		"TelephonyAlerts.js",
 		"../../stylesheets/dashboard.css",
 		"../../stylesheets/notifications.css"

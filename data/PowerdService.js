@@ -140,7 +140,7 @@ enyo.kind({
 
 					if(this.batteryLevel <= 5 && !this.batteryLevel5Shown) {
 						this.batteryLevel5Shown = true;
-						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, {"metrics":"units"}, 15);
+						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, undefined, 140);
 					}
 					else if(this.batteryLevel > 5 && this.batteryLevel <= 10 && !this.batteryLevel10Shown) {
 						this.batteryLevel10Shown = true;
@@ -176,7 +176,7 @@ enyo.kind({
 	},
 
 	showNotChargingAlert: function() {
-		enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "NotChargingAlert", {}, {"metrics":"units"}, 20);
+		enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "NotChargingAlert", {}, undefined, 175);
 		this.notChargingAlertTimer = undefined;
 	},
 
@@ -209,7 +209,10 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, {"metrics":"units"}, 30);
+			// Measured against the rendered content: five buttons plus their
+			// margins. A popup cannot be resized once it is open, so a height
+			// that falls short simply cuts the bottom buttons off.
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 230);
 		}
 	},
 
