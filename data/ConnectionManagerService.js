@@ -83,7 +83,7 @@ enyo.kind({
 
 		if (!this.captivePortalActive) {
 			this.captivePortalActive = true;
-			enyo.windows.addBannerMessage($L("Network Login Required"), "{}", "/usr/palm/applications/com.palm.systemui/images/net_portal_sum_24.png");
+			this.bannerMsgId = enyo.windows.addBannerMessage($L("Network Login Required"), "{}", "/usr/palm/applications/com.palm.systemui/images/net_portal_sum_24.png");
 		}
 
 		enyo.windows.openDashboard("app/CaptivePortalAlerts/captiveportalalerts.html", "CaptivePortalDashboard", portal, {
@@ -93,6 +93,15 @@ enyo.kind({
 
 	closeCaptivePortalDashboard: function() {
 		this.captivePortalActive = false;
+
+		// The banner maps to a sticky toast on LuneOS, so it has to be
+		// withdrawn like legacy NetworkApp did, or stale "Network Login
+		// Required" entries pile up in the notification area
+		if (this.bannerMsgId) {
+			enyo.windows.removeBannerMessage(this.bannerMsgId);
+			this.bannerMsgId = null;
+		}
+
 		var wCard = enyo.windows.fetchWindow("CaptivePortalDashboard");
 		if (wCard)
 			wCard.close();
