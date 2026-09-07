@@ -1,6 +1,7 @@
 // @@@LICENSE
 //
 //      Copyright (c) 2010-2012 Hewlett-Packard Development Company, L.P.
+//      Copyright (c) 2026 Herman van Hazendonk <github.com@herrie.org>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +18,14 @@
 // LICENSE@@@
 
 /*
- * Popup Alert for USB.
+ * USB mode selector, shown when a USB host is connected. Android-style: the
+ * user picks File Transfer (MTP, served by umtprd via com.palm.storage) or
+ * Charge only. Modelled on PowerdAlerts' multi-button PowerOffAlert.
  */
 
 enyo.kind({
 	name: "StorageAlert",
 	kind: "VFlexBox",
-	showMSMWarning: false,
 	components: [
 		{
 			kind: enyo.Control,
@@ -40,24 +42,24 @@ enyo.kind({
 					components: [
 						{
 							className: "title",
-							content: $L("Connected")
+							content: $L("USB Connected")
 						},
 						{
 							className: "message",
-							content: $L("Tap \"USB Drive\" to transfer files to and from your computer. To charge your device, use the power supply that came with it.")
+							content: $L("Choose how to use the USB connection.")
 						}
 					]
 				}
 			]
 		 },
 		 {kind: "ApplicationEvents", onWindowDeactivated:"handleWindowDeActivated"},
-		 {kind: "NotificationButton", className:"enyo-notification-button", layoutKind:"HFlexLayout", 
+		 {kind: "NotificationButton", className:"enyo-notification-button-affirmative", layoutKind:"HFlexLayout",
 			 components:[
-		                   {flex:1, content: $L("USB Drive"), onclick: "enterMSM"},
+		                   {flex:1, content: $L("File Transfer"), onclick: "enterMSM"},
 		                   {name:"infoIcon", className:"info-icon", onclick: "showInfo"}
 		                ]
 		 },
-		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"charge", components:[{content: $L("Close")}]},
+		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"charge", components:[{content: $L("Charge only")}]},
 		 {
 		 	kind:enyo.PalmService, name:"enterMSMMode", service:"palm://com.palm.storage/diskmode/", method:"enterMSM"
 		 },
@@ -68,33 +70,25 @@ enyo.kind({
 			 kind:enyo.PalmService, name:"unlock", service:"palm://com.palm.display/control/", method:"setState"
 		 }
 	],
-	
+
 	create: function() {
 		this.inherited(arguments);
-		this.showMSMWarning = enyo.application.getSystemPreferences().showMSMWarning;
 		this.tapOnButton = false;
 	},
-	
+
+	// One tap enters MTP. Legacy code bailed out here when the device was
+	// locked (leaving the user stuck on the lockscreen) and forced a second
+	// "warning" popup; neither is wanted for a plain file-transfer toggle.
 	enterMSM: function(inSender) {
+		this.tapOnButton = true;
 		if(enyo.application.isDeviceLocked()) {
 			this.$.unlock.call({state:"undock"});
-			return;
 		}
-		this.tapOnButton = true;
+		this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
 		this.createUSBDashboard();
-		
-		if (!this.showMSMWarning) {			
-			var wCard = enyo.windows.fetchWindow("USBModeWarningAlert");
-			var windowHeight =  (enyo.g11n.currentLocale().locale == "en_us") ? 185 : 220;
-			if(!wCard)
-				enyo.windows.openPopup("storagedalerts.html", "USBModeWarningAlert", {}, undefined, windowHeight);
-		}
-		else {					
-			this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
-		}			
 		close();
 	},
-	
+
 	showInfo: function(inSender) {
 		var callParams = {
       		id: 'com.palm.app.help',
@@ -105,41 +99,49 @@ enyo.kind({
 		this.$.launchHelp.call(callParams);
 		this.charge();
 	},
-	
+
 	createUSBDashboard: function() {
 		var wCard = enyo.windows.fetchWindow("USBDashboard");
 		if(!wCard) {
 			enyo.windows.openDashboard("storagedalerts.html", "USBDashboard", enyo.json.stringify({}), {
 				"icon": "/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png"
 			});
-		} 
-	},
-	
-	charge: function() {	
-		this.tapOnButton = true;
-		//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png');
-		this.createUSBDashboard();	
-		close();
-	},
-	
-	handleWindowDeActivated: function() {
-		if(!this.tapOnButton) {
-			//enyo.windows.addBannerMessage($L("Charging battery"), enyo.json.stringify({}),'/usr/palm/applications/com.palm.systemui/images/notification-small-usb.png');
-			this.createUSBDashboard();	
 		}
 	},
-	
+
+	// "Charge only" - leave the gadget as it is (charging) and drop a dashboard
+	// so the user can switch to File Transfer later.
+	charge: function() {
+		this.tapOnButton = true;
+		this.createUSBDashboard();
+		close();
+	},
+
+	handleWindowDeActivated: function() {
+		if(!this.tapOnButton) {
+			this.createUSBDashboard();
+		}
+	},
+
 });
+
+/*
+ * Persistent USB dashboard. Android-style: it shows the current USB mode and
+ * lets the user switch. It tracks the mode live by subscribing to storaged's
+ * MSMStatus signal (the addmatch pattern used by PowerdService), so it stays
+ * correct across enter/exit without polling.
+ */
 
 enyo.kind({
 	name: "USBDashboard",
 	kind: "HFlexBox",
 	className:"dashboard-window",
-	showMSMWarning: false,
+	inMSM: false,
 	components: [
 		{
 			kind: enyo.Control,
 			className: "dashboard-notification-module single",
+			onclick: "clickHandler",
 			components: [
 				{
 					className: "palm-dashboard-icon-container", components:[
@@ -152,9 +154,10 @@ enyo.kind({
 					className: "palm-dashboard-text-container",
 					components: [{
 						className: "dashboard-title",
-						content: $L("USB Drive")
+						content: $L("USB")
 					}, {
-						content: $L("Tap to enter USB Drive mode"),
+						name: "dashText",
+						content: $L("Charging — tap for File Transfer"),
 						className: "palm-dashboard-text normal"
 					}]
 				}
@@ -164,109 +167,62 @@ enyo.kind({
 			kind:enyo.PalmService, name:"hostIsConnected", service:"palm://com.palm.storage/diskmode/", method:"hostIsConnected", onResponse:"handleHostIsConnected"
 		},
 		{
+			kind:enyo.PalmService, name:"queryMSMStatus", service:"palm://com.palm.storage/diskmode/", method:"queryMSMStatus", onResponse:"handleMSMStatus"
+		},
+		{
+			// Live MSM state updates, mirroring PowerdService's signal addmatch.
+			kind:enyo.PalmService, name:"msmStatusSignal", service:"palm://com.palm.bus/signal/", method:"addmatch", subscribe:true, onResponse:"handleMSMStatus"
+		},
+		{
 		 	kind:enyo.PalmService, name:"enterMSMMode", service:"palm://com.palm.storage/diskmode/", method:"enterMSM"
+		},
+		{
+			// Leaving File Transfer: com.palm.storage treats "media no longer
+			// available on the host" as the trigger to disable MTP (stop
+			// umtprd and restore the charge-only gadget).
+			kind:enyo.PalmService, name:"exitMSMMode", service:"palm://com.palm.storage/diskmode/", method:"avail"
 		},
 		{
 			 kind:enyo.PalmService, name:"unlock", service:"palm://com.palm.display/control/", method:"setState"
 		 }
 	],
-	
+
 	create: function() {
 		this.inherited(arguments);
 		this.$.hostIsConnected.call();
+		this.$.queryMSMStatus.call();
+		this.$.msmStatusSignal.call({"category":"/storaged", "method":"MSMStatus"});
 	},
-	
+
 	handleHostIsConnected: function(inSender, inResponse) {
 		if(inResponse.hostIsConnected != undefined && !inResponse.hostIsConnected) {
 			close();
 		}
 	},
-	
+
+	handleMSMStatus: function(inSender, inResponse) {
+		if(inResponse && inResponse.inMSM != undefined) {
+			this.inMSM = inResponse.inMSM;
+			if(this.$.dashText) {
+				this.$.dashText.setContent(this.inMSM
+					? $L("File Transfer — tap to stop")
+					: $L("Charging — tap for File Transfer"));
+			}
+		}
+	},
+
 	clickHandler: function(inSender) {
 		if(enyo.application.isDeviceLocked()) {
 			this.$.unlock.call({state:"undock"});
-			return;
 		}
-		this.showMSMWarning = enyo.application.getSystemPreferences().showMSMWarning;
-		if (!this.showMSMWarning) {	
-			var windowHeight =  (enyo.g11n.currentLocale().locale == "en_us") ? 185 : 220;
-			var wCard = enyo.windows.fetchWindow("USBModeWarningAlert");
-			if(!wCard)
-				enyo.windows.openPopup("storagedalerts.html", "USBModeWarningAlert", {}, undefined, windowHeight);
-		}
-		else {					
-			this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
-		}	
-	},
-	
-	
-});
-
-/*
- * Popup Alert for USB Mode Warning.
- */
-
-enyo.kind({
-	name: "USBModeWarningAlert",
-	kind: "VFlexBox",
-	components: [
-		{
-			kind: enyo.Control,
-			className: "notification-container",
-			domAttributes:{
-				"x-palm-popup-content": " "
-			},
-			components: [
-				{
-					className: "notification-icon icon-warning"
-				},
-				{
-					className: "notification-text",
-					components: [
-						{
-							className: "message",
-							content: $L("While your device is in use as a USB drive, certain features may not be available. Eject your device from your computer before disconnecting.")
-						}
-					]
-				}
-			]
-		 },
-		 {kind: "NotificationButton", className: "enyo-notification-button-affirmative", layoutKind:"HFlexLayout", pack:"center", onclick:"checkHostIsConnected", components:[{content: $L("OK")}]},
-		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"closeAlert", components:[{content: $L("Cancel")}]},
-		 {
-			kind:enyo.PalmService, name:"hostIsConnected", service:"palm://com.palm.storage/diskmode/", method:"hostIsConnected", onResponse:"handleHostIsConnected"
-		 },
-		 {
-		 	kind:enyo.PalmService, name:"enterMSMMode", service:"palm://com.palm.storage/diskmode/", method:"enterMSM"
-		 },
-		 {
-			 kind:enyo.PalmService, name:"unlock", service:"palm://com.palm.display/control/", method:"setState"
-		 }
-	],
-	
-	create: function() {
-		this.inherited(arguments);
-	},
-	
-	checkHostIsConnected: function(inSender) {
-		if(enyo.application.isDeviceLocked()) {
-			this.$.unlock.call({state:"undock"});
-			return;
-		}
-		this.$.hostIsConnected.call();
-		enyo.application.getSystemService().setMSMWarning(true);
-	},
-	
-	handleHostIsConnected: function(inSender, inResponse) {
-		if(inResponse.hostIsConnected) {
+		if(this.inMSM) {
+			this.$.exitMSMMode.call({"connected": false});
+		} else {
 			this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
 		}
-		close();
 	},
-	
-	closeAlert: function() {
-		close();
-	},
+
+
 });
 
 /*
@@ -308,7 +264,7 @@ enyo.kind({
 		 },
 		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"closeAlert", components:[{content: $L("OK")}]}
 	],
-	
+
 	create: function() {
 		this.inherited(arguments);
 		this.params = enyo.windowParams;
@@ -316,14 +272,14 @@ enyo.kind({
 			this.$.fsckerror.setShowing(false);
 			this.$.formaterror.setShowing(true);
 		}
-		
+
 		if(this.params.fsckError) {
 			this.$.fsckerror.setShowing(true);
 			this.$.formaterror.setShowing(false);
 		}
 	},
-	
-	
+
+
 	closeAlert: function() {
 		close();
 	},

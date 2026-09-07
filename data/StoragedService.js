@@ -156,10 +156,6 @@ enyo.kind({
 		wCard = enyo.windows.fetchWindow("USBDashboard")
 		if(wCard)
 			wCard.close();
-			
-		wCard = enyo.windows.fetchWindow("USBModeWarningAlert")
-		if(wCard)
-			wCard.close();
 	},
 	
 });
