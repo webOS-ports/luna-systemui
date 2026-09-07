@@ -42,7 +42,10 @@ enyo.kind({
 		{
 			kind:"SysUpdateService", name:"sysUpdateService"
 		},
-		{ 
+		{
+			kind:"ConnectionManagerService", name:"connectionManagerService"
+		},
+		{
 			kind: "SyncUI.missingCredentials", name:"accountsSyncUI", smallIcon:"images/notification-small-info.png", largeIcon:"images/notification-large-info.png"
 		},
 		{
