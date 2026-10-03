@@ -57,7 +57,10 @@ enyo.kind({
 	},
 
 	handleChargerStatus: function(inSender, inResponse) {
-		if(inResponse.DockConnected || inResponse.USBConnected || (inResponse.Charging && inResponse.USBName == "wall")) {
+		// Charging alone counts too: batteryd reports a supply it cannot classify
+		// (a wireless charger the kernel only marks "online") with neither
+		// DockConnected nor USBConnected set, and USBName "none".
+		if(inResponse.DockConnected || inResponse.USBConnected || inResponse.Charging) {
 			//This is the scenario where dock is detected but it's not placed it properly on the dock.
 			if(inResponse.DockConnected && !inResponse.DockPower) {
 				this.chargingBannerShown = false;
@@ -83,7 +86,10 @@ enyo.kind({
 					enyo.windows.fetchWindow("NotChargingAlert").close();
 				}
 
-				if(!this.chargingBannerShown && (inResponse.DockConnected || inResponse.USBName == "wall")) {
+				// Whatever is charging it: a PC port ("pc"), a direct charger and
+				// an unclassified supply charge the battery as much as a wall
+				// adapter or a dock does.
+				if(!this.chargingBannerShown) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
 					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
 					this.chargingBannerShown = true;
