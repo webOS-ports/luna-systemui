@@ -192,3 +192,68 @@ palm-dashboard-text.normal {
 }
 
 
+
+/* USB dashboard: laid out exactly as the shell lays out a toast
+ * (luna-next-cardshell NotificationItem.qml) - icon 0.62 of the row's
+ * height, 0.2 in from the left; text starting 0.35 past the icon, a bold
+ * white title over a regular white line - so the two rows line up in the
+ * notification area. In vh, i.e. proportions of the dashboard window's
+ * height, which is the row's height, whatever the page zoom. The rounded bar
+ * behind it is drawn by the shell, so the legacy container artwork is
+ * switched off. */
+/* Full width: with both its children positioned absolutely, the module
+ * would otherwise shrink to nothing and clip the text away. */
+.usb-dashboard .dashboard-notification-module {
+	width: 100vw;
+	height: 100vh;
+	position: relative;
+}
+.usb-dashboard .palm-dashboard-icon-container,
+.usb-dashboard .palm-dashboard-text-container,
+.usb-dashboard.single:active .palm-dashboard-icon-container,
+.usb-dashboard .single:active .palm-dashboard-icon-container,
+.usb-dashboard .single:active .palm-dashboard-text-container {
+	-webkit-border-image: none;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+	float: none;
+}
+.usb-dashboard .palm-dashboard-icon-container {
+	position: absolute;
+	left: 20vh;
+	top: 19vh;
+	width: 62vh;
+	height: 62vh;
+}
+.usb-dashboard .palm-dashboard-icon.charging {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background: url(../images/notification-usb.png) center center no-repeat;
+	background-size: contain;
+}
+/* Two 40vh lines, centred: 10vh above and below. */
+.usb-dashboard .palm-dashboard-text-container {
+	position: absolute;
+	left: 117vh;
+	right: 20vh;
+	top: 10vh;
+	width: auto;
+	height: 80vh;
+	max-width: none;
+	display: block;
+}
+.usb-dashboard .dashboard-title,
+.usb-dashboard .palm-dashboard-text {
+	font-size: 31.5vh;
+	line-height: 40vh;
+	margin: 0;
+	color: #fff;
+}
+.usb-dashboard .palm-dashboard-text {
+	font-weight: normal;
+}
+.usb-dashboard .dashboard-notification-module:active {
+	opacity: 0.7;
+}
