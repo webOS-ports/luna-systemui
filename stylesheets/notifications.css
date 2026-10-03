@@ -95,33 +95,6 @@ body {
 		height: 48px;
 }
 
-.info-icon {
-  height: 37px;
-  width: 66px;
-  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat top center;
-  margin-top:-14px;
-  right:1px;
-  position: absolute;
-}
-
-.info-icon.selected {
-  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat center center;
-}
-
-.system-notification.usb-mode .info-icon {
-  height: 50px;
-  width: 66px;
-  background: url(../images/palm-notification-button-info.png) no-repeat top center;
-  right: -20px;
-  position: absolute;
-  margin-top: -3px;
-}
-
-.system-notification.usb-mode .info-icon.selected {
-  background: url(../images/palm-notification-button-info.png) no-repeat center center;
-}
-
-
 /* Power menu and USB prompt: legacy webOS's glass buttons.
  *
  * Both are drawn the way LunaSysMgr drew them (measured off a Pre3): each
@@ -180,8 +153,6 @@ body {
 		var(--glass-horizon-below) 48%,
 		var(--glass-bottom) calc(100% - 3px),
 		var(--glass-rim-bottom) 100%);
-	/* So the info icon below has something to anchor against. */
-	position: relative;
 	/* Black (Cancel, the USB prompt's buttons). */
 	--glass-rim-top: #787878;
 	--glass-top: #595959;
@@ -225,18 +196,4 @@ body {
 	-webkit-border-image: none;
 	-webkit-filter: brightness(0.8);
 	filter: brightness(0.8);
-}
-
-/* The info button sits inside the right end of its button, centred; the
- * -18px is half its 37px height. */
-.power-menu .info-icon, .usb-mode .info-icon {
-	top: 50%;
-	margin-top: -18px;
-	right: 4px;
-}
-
-/* The USB prompt's info button sits on a black button, so it takes the dark
- * variant of the icon. */
-.usb-mode .info-icon {
-	background-image: url(../images/palm-notification-button-info.png);
 }
