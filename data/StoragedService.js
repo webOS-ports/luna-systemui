@@ -68,7 +68,11 @@ enyo.kind({
 	 */
 	showStorageModeAlert: function() {
 		var wCard = enyo.windows.fetchWindow("StorageModeAlert");
-		var windowHeight =  (enyo.g11n.currentLocale().locale == "en_us") ? 200 : 220;
+		// Two buttons at --notification-button-height (68px, see
+		// stylesheets/notifications.css) plus their 3px margins, as for the
+		// power menu; the prompt has no text left to wrap differently by
+		// locale. Anything taller is empty space under the buttons.
+		var windowHeight = 148;
 		if(!wCard)
 			enyo.windows.openPopup("app/StoragedAlerts/storagedalerts.html", "StorageModeAlert", {}, undefined, windowHeight);
 	},

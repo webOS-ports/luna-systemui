@@ -135,11 +135,11 @@ body {
  * from a constant that assumes the stock button, and those popups cannot be
  * resized once open, so enlarging the buttons globally would clip them.
  */
-.power-menu {
+.power-menu, .usb-mode {
 	--notification-button-height: 68px;
 }
 
-.power-menu .enyo-notification-button {
+.power-menu .enyo-notification-button, .usb-mode .enyo-notification-button {
 	height: var(--notification-button-height);
 	/* Centres the label. The button has no vertical centring of its own - the
 	 * child stretches and the text sits at the top of it - so the line box has
@@ -158,4 +158,12 @@ body {
 .power-menu .info-icon {
 	top: 50%;
 	margin-top: -18px;
+}
+
+/* The USB prompt's info button sits on a black pill, so it takes the dark
+ * variant of the icon; positioned as the power menu's. */
+.usb-mode .info-icon {
+	top: 50%;
+	margin-top: -18px;
+	background-image: url(../images/palm-notification-button-info.png);
 }
