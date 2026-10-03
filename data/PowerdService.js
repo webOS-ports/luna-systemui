@@ -91,7 +91,7 @@ enyo.kind({
 				// adapter or a dock does.
 				if(!this.chargingBannerShown) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
-					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
+					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
 					this.chargingBannerShown = true;
 				}  
 			}

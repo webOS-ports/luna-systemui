@@ -119,7 +119,7 @@ enyo.kind({
 enyo.kind({
 	name: "USBDashboard",
 	kind: "HFlexBox",
-	className:"dashboard-window",
+	className:"dashboard-window usb-dashboard",
 	inMSM: false,
 	components: [
 		{
