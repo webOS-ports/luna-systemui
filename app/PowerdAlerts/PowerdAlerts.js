@@ -85,7 +85,10 @@ enyo.kind({
 		 {kind:"PalmService", name:"launchHelp", service:"palm://com.palm.applicationManager/", method:"open"},
 		 {kind: "PalmService", name:"shutdown", service:"palm://com.webos.service.sleep/shutdown/", method:"machineOff"},
 		 {kind: "PalmService", name:"reboot", service:"palm://com.webos.service.sleep/shutdown/", method:"machineReboot"},
-		 {kind: "PalmService", name:"lunaNextRestart", service:"palm://org.webosports.luna", method: "restart"}
+		 // org.webosports.luna was luna-next's service and went with it. The
+		 // package service restarts the UI the way Preware does
+		 // (systemctl restart surface-manager).
+		 {kind: "PalmService", name:"lunaNextRestart", service:"palm://org.webosports.service.ipkg/", method: "restartLuna"}
 	],
 	
 	create: function() {
