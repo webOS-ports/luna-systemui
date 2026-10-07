@@ -18,53 +18,26 @@
 // LICENSE@@@
 
 /*
- * USB mode selector, shown when a USB host is connected. Android-style: the
- * user picks File Transfer (MTP, served by umtprd via com.palm.storage) or
- * Charge only. Modelled on PowerdAlerts' multi-button PowerOffAlert.
+ * USB mode selector, shown when a USB host is connected: File Transfer (MTP,
+ * served by umtprd via com.palm.storage) or Charge only.
+ *
+ * Laid out the way legacy webOS showed its USB prompt: just the two black
+ * notification pills, with no heading -
+ * the buttons say what the choice is. Sized like PowerdAlerts' PowerOffAlert
+ * (the .usb-mode rules in notifications.css), and StoragedService opens the
+ * popup at exactly the height of the two buttons.
  */
 
 enyo.kind({
 	name: "StorageAlert",
 	kind: "VFlexBox",
+	className: "usb-mode",
 	components: [
-		{
-			kind: enyo.Control,
-			className: "notification-container",
-			domAttributes:{
-				"x-palm-popup-content": " "
-			},
-			components: [
-				{
-					className: "notification-icon icon-drive-mode"
-				},
-				{
-					className: "notification-text",
-					components: [
-						{
-							className: "title",
-							content: $L("USB Connected")
-						},
-						{
-							className: "message",
-							content: $L("Choose how to use the USB connection.")
-						}
-					]
-				}
-			]
-		 },
 		 {kind: "ApplicationEvents", onWindowDeactivated:"handleWindowDeActivated"},
-		 {kind: "NotificationButton", className:"enyo-notification-button-affirmative", layoutKind:"HFlexLayout",
-			 components:[
-		                   {flex:1, content: $L("File Transfer"), onclick: "enterMSM"},
-		                   {name:"infoIcon", className:"info-icon", onclick: "showInfo"}
-		                ]
-		 },
+		 {kind: "NotificationButton", className:"enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"enterMSM", components:[{content: $L("File Transfer")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"charge", components:[{content: $L("Charge only")}]},
 		 {
 		 	kind:enyo.PalmService, name:"enterMSMMode", service:"palm://com.palm.storage/diskmode/", method:"enterMSM"
-		 },
-		 {
-		 	kind:enyo.PalmService, name:"launchHelp", service:"palm://com.palm.applicationManager/", method:"open"
 		 },
 		 {
 			 kind:enyo.PalmService, name:"unlock", service:"palm://com.palm.display/control/", method:"setState"
@@ -87,17 +60,6 @@ enyo.kind({
 		this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
 		this.createUSBDashboard();
 		close();
-	},
-
-	showInfo: function(inSender) {
-		var callParams = {
-      		id: 'com.palm.app.help',
-      		params: {
-          		target: "http://help.palm.com/basics/copy_files/basics_media_sync_help.html"
-      		}
-  		};
-		this.$.launchHelp.call(callParams);
-		this.charge();
 	},
 
 	createUSBDashboard: function() {
@@ -135,7 +97,7 @@ enyo.kind({
 enyo.kind({
 	name: "USBDashboard",
 	kind: "HFlexBox",
-	className:"dashboard-window",
+	className:"dashboard-window usb-dashboard",
 	inMSM: false,
 	components: [
 		{

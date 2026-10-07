@@ -95,67 +95,105 @@ body {
 		height: 48px;
 }
 
-.info-icon {
-  height: 37px;
-  width: 66px;
-  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat top center;
-  margin-top:-14px;
-  right:1px;
-  position: absolute;
-}
-
-.info-icon.selected {
-  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat center center;
-}
-
-.system-notification.usb-mode .info-icon {
-  height: 50px;
-  width: 66px;
-  background: url(../images/palm-notification-button-info.png) no-repeat top center;
-  right: -20px;
-  position: absolute;
-  margin-top: -3px;
-}
-
-.system-notification.usb-mode .info-icon.selected {
-  background: url(../images/palm-notification-button-info.png) no-repeat center center;
-}
-
-
-/* Power menu touch targets.
+/* Power menu and USB prompt: legacy webOS's glass buttons.
  *
- * The stock notification button comes out 40 css px tall, which is ~5mm on
- * every device we ship (measured: 5.0mm on tissot, 5.4mm on mindphone) - css px
- * are close to physically constant here, because WAM_PAGE_ZOOM_FACTOR is tuned
- * per device. That is well under the ~9mm both Material (48dp) and iOS (44pt)
- * treat as the minimum, and it is worst on this alert: five stacked buttons
- * where "Shut Down" sits directly above "Cancel", so a near miss is expensive.
+ * Both are drawn the way LunaSysMgr drew them (measured off a Pre3): each
+ * button a rounded slab inset from the screen edges, a lighter upper half
+ * fading down to a hard horizon just below the middle, a lower half that
+ * brightens again towards the bottom, a 1px light rim along both edges and a
+ * regular-weight label. Onyx's own notification button - a near-square
+ * border-image stretched edge to edge over a flat colour, bold label - is
+ * switched off for these two alerts only.
  *
- * Scoped to .power-menu on purpose. Every other alert derives its popup height
- * from a constant that assumes the stock button, and those popups cannot be
- * resized once open, so enlarging the buttons globally would clip them.
+ * Height: the stock notification button comes out 40 css px tall, which is
+ * ~5mm on every device we ship (measured: 5.0mm on tissot, 5.4mm on
+ * mindphone) - css px are close to physically constant here, because
+ * WAM_PAGE_ZOOM_FACTOR is tuned per device. That is well under the ~9mm both
+ * Material (48dp) and iOS (44pt) treat as the minimum, and it is worst on the
+ * power menu: five stacked buttons where "Shut Down" sits directly above
+ * "Cancel", so a near miss is expensive. The gap between buttons helps there
+ * too.
+ *
+ * Scoped on purpose. Every other alert derives its popup height from a
+ * constant that assumes the stock button, and those popups cannot be resized
+ * once open, so changing the buttons globally would clip them. The two
+ * popups here are opened at exactly the height of their buttons and gaps:
+ * PowerdService.showPowerOffAlert and StoragedService.showStorageAlert have to
+ * be kept in step with these values.
  */
-.power-menu {
+.power-menu, .usb-mode {
 	--notification-button-height: 68px;
+	--notification-button-gap: 14px;
+	padding-top: var(--notification-button-gap);
 }
 
-.power-menu .enyo-notification-button {
+.power-menu .enyo-button, .usb-mode .enyo-button {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 	height: var(--notification-button-height);
-	/* Centres the label. The button has no vertical centring of its own - the
-	 * child stretches and the text sits at the top of it - so the line box has
-	 * to fill the content box: the height less 6px of border-image and 4px of
-	 * padding, top and bottom. */
-	line-height: calc(var(--notification-button-height) - 20px);
-	/* So the info icon below has something to anchor against. Without it the
-	 * icon resolves right:1px against the viewport, which only looked right
-	 * because the button happens to span the full width. */
-	position: relative;
+	/* The label sits in a child that stretches, with its text at the top, so
+	 * a line box the full height of the button is what centres it. */
+	line-height: calc(var(--notification-button-height) - 2px);
+	margin: 0 var(--notification-button-gap) var(--notification-button-gap);
+	padding: 0 12px;
+	-webkit-border-image: none;
+	border: 1px solid rgba(0, 0, 0, 0.7);
+	border-radius: calc(var(--notification-button-height) * 0.19);
+	/* Not webOS's proportion (about 0.44 of the button): these buttons are
+	 * taller than webOS's for the sake of the touch target, and the label
+	 * scaled with them came out far larger than webOS's did in the hand. */
+	font-size: 22px;
+	font-weight: normal;
+	color: #fff;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+	background: linear-gradient(to bottom,
+		var(--glass-rim-top) 0,
+		var(--glass-top) 2px,
+		var(--glass-horizon-above) 47%,
+		var(--glass-horizon-below) 48%,
+		var(--glass-bottom) calc(100% - 3px),
+		var(--glass-rim-bottom) 100%);
+	/* Black (Cancel, the USB prompt's buttons). */
+	--glass-rim-top: #787878;
+	--glass-top: #595959;
+	--glass-horizon-above: #1b1b1b;
+	--glass-horizon-below: #010101;
+	--glass-bottom: #313131;
+	--glass-rim-bottom: #585858;
 }
 
-/* The icon is absolutely positioned off its static position, so it stayed put
- * when the button grew and ended up hugging the top edge. Centre it instead;
- * the -18px is half its 37px height. */
-.power-menu .info-icon {
-	top: 50%;
-	margin-top: -18px;
+.power-menu .enyo-notification-button-affirmative {
+	--glass-rim-top: #abe380;
+	--glass-top: #86c758;
+	--glass-horizon-above: #407e19;
+	--glass-horizon-below: #2d6909;
+	--glass-bottom: #5e9f35;
+	--glass-rim-bottom: #80c159;
+}
+
+.power-menu .enyo-notification-button-alternate {
+	--glass-rim-top: #f4cd4e;
+	--glass-top: #e3b62c;
+	--glass-horizon-above: #a76b03;
+	--glass-horizon-below: #965802;
+	--glass-bottom: #bc8103;
+	--glass-rim-bottom: #dda518;
+}
+
+.power-menu .enyo-notification-button-negative {
+	--glass-rim-top: #ea9180;
+	--glass-top: #dd725d;
+	--glass-horizon-above: #ad270a;
+	--glass-horizon-below: #a01c01;
+	--glass-bottom: #cc4428;
+	--glass-rim-bottom: #df6048;
+}
+
+/* Onyx swaps its border-image back in for the pressed state; darken the
+ * glass instead. */
+.power-menu .enyo-button.enyo-button-down, .usb-mode .enyo-button.enyo-button-down,
+.power-menu .enyo-button.enyo-button-depressed, .usb-mode .enyo-button.enyo-button-depressed {
+	-webkit-border-image: none;
+	-webkit-filter: brightness(0.8);
+	filter: brightness(0.8);
 }

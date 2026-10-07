@@ -72,17 +72,11 @@ enyo.kind({
 	kind: "VFlexBox",
 	inAirplaneMode: false,
 	components: [
-		 {kind: "NotificationButton", className:"enyo-notification-button-affirmative", layoutKind:"HFlexLayout", 
-			 components:[
-		                   {flex:1, name:"flightmode", content: $L("Airplane Mode"), onclick: "changeFlightMode"},
-		                   {name:"infoIcon", className:"info-icon", onclick: "showInfo"}
-		                ]
-		 },
+		 {kind: "NotificationButton", className:"enyo-notification-button-affirmative", layoutKind:"HFlexLayout", pack:"center", onclick: "changeFlightMode", components:[{name:"flightmode", content: $L("Airplane Mode")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button-alternate", layoutKind:"HFlexLayout", pack:"center", onclick:"reboot", components:[{content: $L("Restart")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button-alternate", layoutKind:"HFlexLayout", pack:"center", onclick:"lunaNextRestart", components:[{content: $L("Luna Next restart")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button-negative", layoutKind:"HFlexLayout", pack:"center",  onclick:"poweroff", components:[{content: $L("Shut Down")}]},
 		 {kind: "NotificationButton", className: "enyo-notification-button", layoutKind:"HFlexLayout", pack:"center", onclick:"closeAlert", components:[{content: $L("Cancel")}]},
-		 {kind:"PalmService", name:"launchHelp", service:"palm://com.palm.applicationManager/", method:"open"},
 		 {kind: "PalmService", name:"shutdown", service:"palm://com.webos.service.sleep/shutdown/", method:"machineOff"},
 		 {kind: "PalmService", name:"reboot", service:"palm://com.webos.service.sleep/shutdown/", method:"machineReboot"},
 		 // org.webosports.luna was luna-next's service and went with it. The
@@ -104,17 +98,6 @@ enyo.kind({
 	
 	changeFlightMode: function(inSender) {
 		enyo.application.getSystemService().setAirplaneMode(!this.inAirplaneMode);
-		close();
-	},
-	
-	showInfo: function(inSender) {
-		var callParams = {
-      		id: 'com.palm.app.help',
-      		params: {
-          		target: "http://help.palm.com/basics/turn_phone_on_off/basics_wireless_services_on_off.html"
-      		}
-  		};
-		this.$.launchHelp.call(callParams);
 		close();
 	},
 	
