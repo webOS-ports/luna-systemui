@@ -68,11 +68,12 @@ enyo.kind({
 	 */
 	showStorageModeAlert: function() {
 		var wCard = enyo.windows.fetchWindow("StorageModeAlert");
-		// Two buttons at --notification-button-height (68px, see
-		// stylesheets/notifications.css) plus their 3px margins, as for the
-		// power menu; the prompt has no text left to wrap differently by
-		// locale. Anything taller is empty space under the buttons.
-		var windowHeight = 148;
+		// The gap above the buttons, then two buttons at
+		// --notification-button-height (68px, see stylesheets/notifications.css)
+		// each with --notification-button-gap (14px) under it, as for the power
+		// menu; the prompt has no text left to wrap differently by locale.
+		// Anything taller is empty space under the buttons.
+		var windowHeight = 178;
 		if(!wCard)
 			enyo.windows.openPopup("app/StoragedAlerts/storagedalerts.html", "StorageModeAlert", {}, undefined, windowHeight);
 	},
