@@ -91,9 +91,9 @@ enyo.kind({
 			this.phoneInit();
 		}
 		else {
-			setTimeout(function() {
-				this.checkTelephonyReady();
-			}, 5000);
+			// One pending retry at most: a telephonyd restart starts another check.
+			clearTimeout(this.telephonyReadyTimer);
+			this.telephonyReadyTimer = setTimeout(enyo.bind(this, "checkTelephonyReady"), 5000);
 		}
 	},
 	
