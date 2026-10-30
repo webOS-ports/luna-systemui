@@ -51,6 +51,12 @@ enyo.kind({
 	        return;
 	   
 	    if (inResponse["mode-avail"]) {
+			// Only a change to connected shows the alert: at start-up both this
+			// signal and handleHostIsConnected report the same cable, within
+			// moments of each other, and a popup still opening is not yet found
+			// by fetchWindow, so each would open one.
+			if (this.isUSBConnected)
+				return;
 			this.isUSBConnected = true;
 			if (this.canUSBAlertDisplayed()) 
 				this.showStorageModeAlert();
@@ -119,6 +125,9 @@ enyo.kind({
 	
 	handleHostIsConnected: function(inSender, inResponse) {
 		if(inResponse.result == true && inResponse.hostIsConnected) {
+			// Already announced by an MSMAvail signal; see storageHandleNotifications.
+			if (this.isUSBConnected)
+				return;
 			this.isUSBConnected = true;
 			if (!enyo.application.getTelephonyService().getOnActiveCall()) {
 						if (enyo.application.getSysUpdateService().getUpdateAvailable()) 
