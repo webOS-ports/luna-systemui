@@ -76,14 +76,17 @@ enyo.kind({
 		this.tapOnButton = false;
 	},
 
-	// One tap enters MTP. Legacy code bailed out here when the device was
-	// locked (leaving the user stuck on the lockscreen) and forced a second
-	// "warning" popup; neither is wanted for a plain file-transfer toggle.
+	// One tap enters MTP, with no second "warning" popup. But never while the
+	// device is locked: File Transfer hands the whole of /media/internal to
+	// the USB host read-write, so a locked phone must not be opened up by
+	// whoever plugs it in and taps the alert. Bring up the lock screen
+	// instead and keep the alert, so the owner can tap again once unlocked.
 	enterMSM: function(inSender) {
-		this.tapOnButton = true;
 		if(enyo.application.isDeviceLocked()) {
 			this.$.unlock.call({state:"undock"});
+			return;
 		}
+		this.tapOnButton = true;
 		this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
 		this.createUSBDashboard();
 		close();
@@ -211,15 +214,18 @@ enyo.kind({
 		}
 	},
 
+	// Stopping File Transfer is always allowed; starting it needs an
+	// unlocked device, as in StorageAlert.enterMSM.
 	clickHandler: function(inSender) {
-		if(enyo.application.isDeviceLocked()) {
-			this.$.unlock.call({state:"undock"});
-		}
 		if(this.inMSM) {
 			this.$.exitMSMMode.call({"connected": false});
-		} else {
-			this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
+			return;
 		}
+		if(enyo.application.isDeviceLocked()) {
+			this.$.unlock.call({state:"undock"});
+			return;
+		}
+		this.$.enterMSMMode.call({"user-confirmed": true, "enterIMasq": false});
 	},
 
 
