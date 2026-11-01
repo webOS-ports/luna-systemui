@@ -146,7 +146,7 @@ enyo.kind({
 
 					if(this.batteryLevel <= 5 && !this.batteryLevel5Shown) {
 						this.batteryLevel5Shown = true;
-						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, undefined, 140);
+						enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "LowBatteryAlert", {}, {sound:"/usr/palm/sounds/battery_low.mp3", soundclass:"alerts"}, 140);
 					}
 					else if(this.batteryLevel > 5 && this.batteryLevel <= 10 && !this.batteryLevel10Shown) {
 						this.batteryLevel10Shown = true;
