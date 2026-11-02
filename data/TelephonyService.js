@@ -174,7 +174,7 @@ enyo.kind({
 				case 'service':
 					if(networkMsg.registration == 'home') {		
 						if(enyo.windows.fetchWindow("PhoneNetworkDeniedDash")) 
-							enyo.windows.fetchWindow("PhoneNeworkDeniedDash").close();
+							enyo.windows.fetchWindow("PhoneNetworkDeniedDash").close();
 					}		
 					break;
 				case 'limited':
@@ -262,7 +262,7 @@ enyo.kind({
 	 */
 	
 	showWANAlert: function(showHelp,errCode,networkname) {
-		var params = {"showHelp": showHelp, "errCode": errCode, "carrier": networkName}
+		var params = {"showHelp": showHelp, "errCode": errCode, "carrier": networkname}
 		enyo.windows.openPopup("app/TelephonyAlerts/wirelessalerts.html", "WANConnectionErrorAlert", params, undefined, showHelp ? 180 : 125);
 	},
 	
