@@ -32,7 +32,7 @@ enyo.kind({
 	             { kind:"SystemManager", name:"subscribeToSystemUI", method:"subscribeToSystemUI", subscribe: true, onSuccess:"handleSystemUINotifications" },
 	             { kind:"SystemManager", name:"getAppRestoreNeeded", method:"getAppRestoreNeeded", subscribe: true, onSuccess:"handleAppRestoreNotifications"},
 				 { kind:"SystemManager", name:"getForegroundApplication", method:"getForegroundApplication", subscribe: true, onSuccess:"handleForegroundApplication"},
-				 { kind:"SystemManager", name:"getLockStatus", method:"getLockStatus", subscribe: true, onSuccess:"handleLockStatus"},
+				 { kind:enyo.PalmService, service:"palm://com.palm.display/control/", name:"getLockStatus", method:"lockStatus", subscribe: true, onSuccess:"handleLockStatus"},
 				 {kind:"NetworkAlerts", onTap: "handleAlertTap"},
 				 {kind:"PalmService", name:"mojodbServerStatus", service:"palm://com.palm.bus/signal/", method:"registerServerStatus", subscribe:true, onResponse:"processServiceStatus"},
 				 {kind:"PalmService", name:"dbSpaceCheck", service:"palm://com.palm.db/internal/", method:"spaceCheck", subscribe:true, onSuccess:"handledbCriticalErrorNotifications"},
@@ -428,7 +428,8 @@ enyo.kind({
 	},
 	
 	handleLockStatus: function(inSender, inResponse) {
-		this.deviceLocked = inResponse.locked;
+		// Anything but "unlocked" (dock mode, no answer yet) counts as locked.
+		this.deviceLocked = inResponse.lockState !== "unlocked";
 	},
 	
 	handleFileSystemSpaceNotifications: function(inSender, inResponse) {
