@@ -22,6 +22,8 @@ enyo.depends(
 	"css/ImageAlbum.css",
 	"css/MiscFilePicker.css",
 	"css/AudioPicker.css",
+	"css/FPSort.css",
+	"FPSort.js",
 	"FPMainView.js",
 	"AlbumGridView.js",
 	"MiscFilePicker.js",

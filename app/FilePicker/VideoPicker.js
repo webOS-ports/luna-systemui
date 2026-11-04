@@ -59,9 +59,14 @@ enyo.kind({
 		this.doVideoSelect(selectedImages);
 	},
 	
+	sortableView: function() {
+		return this.$.pane.view;
+	},
+	
 	processViewSelected: function(inSender, inView, inPreviousView) {
 		inView.activateView && inView.activateView(true);
 		inPreviousView && inPreviousView.cleanupView && inPreviousView.cleanupView(true);
+		this.owner.updateSort && this.owner.updateSort();
 	},
 	
 	selectButtonHandler: function() {

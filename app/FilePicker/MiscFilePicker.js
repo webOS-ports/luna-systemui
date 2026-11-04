@@ -64,6 +64,18 @@ enyo.kind({
 		this.selectedFileCount = 0;
 		this.lastSelectedItem = undefined;
 		this.listRefreshRequired = false;
+		this.$.list.setDesc(this.sortDesc());
+	},
+	
+	sortByName: true,
+	// Names A to Z, dates as chosen
+	sortDesc: function() {
+		return !FPSort.byName() && FPSort.newestFirst();
+	},
+	sortChanged: function() {
+		this.$.list.setDesc(this.sortDesc());
+		this.files = [];
+		this.$.list.punt();
 	},
 	
 	allowMultiSelectChanged: function() {
@@ -99,7 +111,8 @@ enyo.kind({
 	
 	listQuery: function(inSender, inQuery) {
 		// IMPORTANT: must return a request object so dbList can decorate it
-		inQuery.orderBy = "name";
+		// Direction comes from the list's desc
+		inQuery.orderBy = FPSort.byName() ? "name" : "modifiedTime";
 		inQuery.where = [];
 		
 		var methodToCall = "find";

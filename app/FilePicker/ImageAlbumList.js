@@ -75,8 +75,13 @@ enyo.kind({
 		this.inherited(arguments);
 		this.filterString = null;
 		this.listRefreshRequired = false;
+		this.$.list.setDesc(FPSort.newestFirst());
 	},
 	queryWatch: function() {
+		this.$.list.punt();
+	},
+	sortChanged: function() {
+		this.$.list.setDesc(FPSort.newestFirst());
 		this.$.list.punt();
 	},
 	activateView: function() {

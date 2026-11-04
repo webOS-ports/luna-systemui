@@ -44,8 +44,9 @@ enyo.kind({
 				onCancel:"processOnCancel",
 				keypressInputDelay: 500
 			},*/ 
-		{kind: "DbService", name: "albumService", dbKind: "com.palm.media.types:1", onSuccess: "gotAlbums", onFailure: "getAlbumsFailure", onWatch: "queryWatch", subscribe:true},
-		{flex:1, name: "list", kind: "DbList", className: "custom-rowgroup", desc:false, onQuery: "listQuery", onSetupRow: "listSetupRow", 
+		{kind: "DbService", name: "albumService", dbKind: "com.palm.media.types:1", onSuccess: "gotAlbums", onFailure: "gotFailure", onWatch: "queryWatch", subscribe:true},
+		{kind: "DbService", name: "albumMore", dbKind: "com.palm.media.types:1", onSuccess: "gotAlbums", onFailure: "gotFailure"},
+		{flex:1, name: "list", kind: "VirtualList", className: "custom-rowgroup", onSetupRow: "listSetupRow", 
 			components: [
 				{name: "videoFileItem", kind: "VideoItem", onclick: "fileClick"}
 							]
@@ -54,79 +55,101 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.files = [];
-		this.$.list.setPageSize(100);
 		this.filterString = null;
 		this.selectedFileCount = 0;
 		this.lastSelectedItem = undefined;
 		this.listRefreshRequired = false;
 	},
 	
+	sortChanged: function() {
+		this.clearSelection();
+		this.files.sort(FPSort.byDate);
+		this.$.list.punt();
+	},
+	
+	clearSelection: function() {
+		for (var i = 0; i < this.files.length; i++)
+			this.files[i].selectedFile = false;
+		this.selectedFileCount = 0;
+		if (this.allowMultiSelect)
+			this.owner.doLabelChange({topRightLabel: FPLabels.multiSelectRightLabel, enableOKButton: false});
+	},
+	
 	allowMultiSelectChanged: function() {
 		this.owner.doLabelChange({showOKButton:this.allowMultiSelect,topRightLabel: FPLabels.multiSelectRightLabel});
 	},
 	
+	// db8 hands an album back oldest first and has no index to sort it by
+	// date (one added later would leave out the entries already there), so
+	// the album is read whole, every page of it, and sorted here.
+	loadAlbum: function() {
+		this.loading = [];
+		this.generation = (this.generation || 0) + 1;
+		var request = this.$.albumService.call({query: this.albumQuery()}, {method: this.filterString ? "search" : "find"});
+		request.generation = this.generation;
+	},
+	
+	albumQuery: function(inPage) {
+		var query = {
+			where: [{prop: 'albumId', op: '=', val: this.albumId}, {prop: "appCacheComplete", op: "=", val: true}],
+			select: ["_id", "_kind", "albumId", "appCacheComplete", "path", "title", "duration", "captureOnDevice", "mediaType", "appGridThumbnail", "size", "modifiedTime"]
+		};
+		if(this.filterString)
+			query.where.push({prop:"searchKey", op:"?", val:this.filterString, collate:"primary"});
+		if (inPage)
+			query.page = inPage;
+		return query;
+	},
+	
 	gotAlbums: function(inSender, inResponse, inRequest) {
-		var that = this;
-		inResponse.results = inResponse.results.filter(function(dbData) {
-			if(dbData.mediaType != "video")
-				return false;
-			return true;
+		// A page of an album that has since been reloaded
+		if (inRequest.generation !== this.generation)
+			return;
+		var videos = (inResponse.results || []).filter(function(dbData) {
+			return dbData.mediaType == "video";
 		});
-		this.files = this.files.concat(inResponse.results);
-		this.$.list.queryResponse(inResponse, inRequest);
+		this.loading = this.loading.concat(videos);
+		if (inResponse.next) {
+			var request = this.$.albumMore.call({query: this.albumQuery(inResponse.next)}, {method: this.filterString ? "search" : "find"});
+			request.generation = this.generation;
+			return;
+		}
+		this.files = this.loading.sort(FPSort.byDate);
+		this.loading = [];
+		this.selectedFileCount = 0;
+		this.$.list.punt();
 	},
 	
 	queryWatch: function() {
-		this.files = [];
-		this.$.list.punt();
+		this.loadAlbum();
 	},
 	
 	activateView: function(listPunt) {
 		if(listPunt || this.listRefreshRequired) {
 			this.files = [];
 			this.$.list.punt();
+			this.loadAlbum();
 			this.listRefreshRequired = false;
 		}
 		else
-			this.$.list.update();
+			this.$.list.refresh();
 	},
 	
-	listQuery: function(inSender, inQuery) {
-		// IMPORTANT: must return a request object so dbList can decorate it
-		inQuery.where = [];
-		
-		var methodToCall = "find";
-		
-		inQuery.where = [{prop: 'albumId', op: '=', val: this.albumId}, {prop: "appCacheComplete", op: "=", val: true}];
-		inQuery.select = ["_id", "_kind", "albumId", "appCacheComplete", "path", "title", "duration", "captureOnDevice", "mediaType", "appGridThumbnail", "size"];
-
-		if(this.filterString) {
-			inQuery.where.push({prop:"searchKey", op:"?", val:this.filterString, collate:"primary"});
-			methodToCall = "search";
-		}
-		
-		return this.$.albumService.call({query:inQuery}, {method:methodToCall});
-	},
-	
-	listSetupRow: function(inSender, inRecord, inIndex) {
-		this.$.videoFileItem.setFile(inRecord);
-		if(inIndex == 0)
-			this.$.videoFileItem.addClass("enyo-first");
+	listSetupRow: function(inSender, inIndex) {
+		var file = this.files[inIndex];
+		if (!file)
+			return false;
+		this.$.videoFileItem.setFile(file);
+		this.$.videoFileItem.addRemoveClass("enyo-first", inIndex == 0);
+		return true;
 	},
 	
 	processOnSearch: function(inSender, inEvent, inValue) {
-		this.filterString = inValue;
-		if(this.filterString && this.filterString.length > 0) {
-			this.listRefreshRequired = true;
-			this.files = [];
-			this.$.list.punt();
-		}
-		else {
-			this.filterString = undefined;
-			this.listRefreshRequired = false;
-			this.files = [];
-			this.$.list.punt();
-		}
+		this.filterString = inValue && inValue.length > 0 ? inValue : undefined;
+		this.listRefreshRequired = !!this.filterString;
+		this.files = [];
+		this.$.list.punt();
+		this.loadAlbum();
 		this.selectedFileCount = 0;
 	},
 	
@@ -135,6 +158,7 @@ enyo.kind({
 		this.listRefreshRequired = false;
 		this.files = [];
 		this.$.list.punt();
+		this.loadAlbum();
 	},
 	
 	fileClick: function(inSender, inEvent) {

@@ -52,6 +52,8 @@ enyo.kind({
 			onFailure: 'dbQueryFail', 
 			onWatch: "queryWatch"
 		},
+		{name: 'dbMore', kind: 'DbService', method: 'find', dbKind: 'com.palm.media.types:1',
+			onSuccess: 'dbQueryResponse', onFailure: 'dbQueryFail'},
 		{flex:1, name:"list", className: "custom-rowgroup", kind:"VirtualList", onSetupRow: "listSetupRow", 
 			components: [
 			             { name: "cells", style: "display: -webkit-box; -webkit-box-align: stretch; -webkit-box-pack: justify; -webkit-box-orient: horizontal;"}
@@ -114,25 +116,55 @@ enyo.kind({
 		return true;  	
 	},
 	queryWatch: function() {
-		this.images = [];
 		this.selectedImages = [];
 		this.dbQuery();
 	},
-	dbQuery: function(inSender, inQuery) {
-		var albumGuid = this.albumId;
-		var inQuery = {};
-		inQuery.where = [{prop: 'albumId', op: '=', val: albumGuid}, {prop: "appCacheComplete", op: "=", val: true}];
-		inQuery.select = ["_id", "albumId", "appCacheComplete", "path", "mediaType", "appGridThumbnail"];
-		return this.$.db.call({query: inQuery});
+	sortChanged: function() {
+		this.clearSelection();
+		this.images.sort(FPSort.byDate);
+		this.$.list.punt();
+	},
+	clearSelection: function() {
+		this.selectedImages = [];
+		for (var i = 0, cell; cell = this.cells && this.cells[i]; i++)
+			cell.removeClass("ImageSelectHighlight");
+		if (this.allowMultiSelect)
+			this.owner.doLabelChange({topRightLabel: FPLabels.multiSelectRightLabel, enableOKButton: false});
+	},
+	// db8 hands an album back oldest first and has no index to sort it by
+	// date (one added later would leave out the entries already there), so
+	// the album is read whole, every page of it, and sorted here.
+	albumQuery: function(inPage) {
+		var query = {
+			where: [{prop: 'albumId', op: '=', val: this.albumId}, {prop: "appCacheComplete", op: "=", val: true}],
+			select: ["_id", "albumId", "appCacheComplete", "path", "mediaType", "appGridThumbnail", "modifiedTime"]
+		};
+		if (inPage)
+			query.page = inPage;
+		return query;
+	},
+	dbQuery: function() {
+		this.loading = [];
+		this.generation = (this.generation || 0) + 1;
+		var request = this.$.db.call({query: this.albumQuery()});
+		request.generation = this.generation;
+		return request;
 	},
 	dbQueryResponse: function(inSender, inResponse, inRequest) {
-		inResponse.results = inResponse.results.filter(function(dbData) {
-			if(dbData.mediaType == 'video')
-				return false;
-			return true;
+		// A page of an album that has since been reloaded
+		if (inRequest.generation !== this.generation)
+			return;
+		var images = (inResponse.results || []).filter(function(dbData) {
+			return dbData.mediaType != 'video';
 		});
-		//copy to local array
-		this.images = this.images.concat(inResponse.results);
+		this.loading = this.loading.concat(images);
+		if (inResponse.next) {
+			var request = this.$.dbMore.call({query: this.albumQuery(inResponse.next)});
+			request.generation = this.generation;
+			return;
+		}
+		this.images = this.loading.sort(FPSort.byDate);
+		this.loading = [];
 		this.$.list.punt();
 	},
 	dbQueryFail: function(inSender, inResponse) {
