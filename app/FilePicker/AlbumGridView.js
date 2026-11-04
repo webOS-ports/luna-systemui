@@ -104,9 +104,9 @@ enyo.kind({
 		}
 		var path = dbEntry.appGridThumbnail && dbEntry.appGridThumbnail.path;
 		if (!path) { 
-			if (dbEntry.mediaType == "video") {
-				path = "images/generic-thumb-video.png";
-			}
+			// The thumbnail is still being made: show the picture itself
+			// rather than whatever this recycled cell showed last
+			path = dbEntry.mediaType == "video" ? "images/generic-thumb-video.png" : dbEntry.path;
 		}
 		var img = cell.$.image;
 		if(path)
