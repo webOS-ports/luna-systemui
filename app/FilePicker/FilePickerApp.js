@@ -48,10 +48,12 @@ enyo.kind({
 		{ kind: "Control",
 			name: "fpTopPanel",
 			layoutKind:"HFlexLayout",
+			align: "center",
 			components: [
 			// labels no longer aligned left and right
 				{flex:1, name: "topLeftLabel", content: FPLabels.singleSelectLeftLabel, className: "enyo-text-header"},
-				{name: "topRightLabel", showing:false, content: FPLabels.singleSelectRightLabel, className: "enyo-item-secondary"}
+				{name: "topRightLabel", showing:false, content: FPLabels.singleSelectRightLabel, className: "enyo-item-secondary"},
+				{name: "sortSelector", kind: "ListSelector", className: "enyo-filepicker-sort", showing: false, onChange: "sortSelected"}
 			],
 		},
 		{kind: "Pane", name: "pane", flex: 1, onSelectView: "processViewSelected", 
@@ -164,6 +166,32 @@ enyo.kind({
 	processViewSelected: function(inSender, inView, inPreviousView) {
 		inView.activateView && inView.activateView();
 		inPreviousView && inPreviousView.cleanupView && inPreviousView.cleanupView();
+		this.updateSort();
+	},
+	
+	// The list on screen, if it can be sorted
+	sortableView: function() {
+		var view = this.$.pane.view;
+		if (view && view.sortableView)
+			view = view.sortableView();
+		return view && view.sortChanged ? view : null;
+	},
+	
+	// Show the sort choice on lists that sort, with Name where the list can sort by it
+	updateSort: function() {
+		var view = this.sortableView();
+		this.$.sortSelector.setShowing(!!view);
+		if (!view)
+			return;
+		var withName = !!view.sortByName;
+		this.$.sortSelector.setItems(FPSort.items(withName));
+		this.$.sortSelector.setValue(withName || !FPSort.byName() ? FPSort.mode : FPSort.NEWEST);
+	},
+	
+	sortSelected: function(inSender, inValue) {
+		FPSort.set(inValue);
+		var view = this.sortableView();
+		view && view.sortChanged();
 	},
 	
 	processSelectedFile: function(inSender, fileData) {
@@ -215,7 +243,8 @@ enyo.kind({
 		
 		if(inValue.topRightLabel) {
 			this.$.topRightLabel.setContent(inValue.topRightLabel);
-			this.$.topRightLabel.setShowing(true);
+			// It counts the files picked, which only multi-select does
+			this.$.topRightLabel.setShowing(!!this.allowMultiSelect);
 			//this.$.spacer.setShowing(true);
 		}
 		

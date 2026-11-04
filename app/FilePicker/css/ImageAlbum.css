@@ -36,6 +36,10 @@
 	width: 107px;
 	margin: 2px;
 }
+/* Fill the square and crop, rather than squash a tall or wide photo into it */
+.AlbumGridThumb img {
+	object-fit: cover;
+}
 .ImageSelectHighlight {
 	-webkit-border-image: url(../images/multi-select-9tile.png) 14 14 14 14 repeat repeat;
 	border-width: 14px;

@@ -88,6 +88,10 @@ enyo.kind({
 		this.singleView = singleView;
 	},
 	
+	sortableView: function() {
+		return this.$.pane.view;
+	},
+	
 	processViewSelected: function(inSender, inView, inPreviousView) {
 		var forceClear = true;
 		if(inPreviousView == "ImageFullView" || inPreviousView == "ImageCropView") {
@@ -102,6 +106,7 @@ enyo.kind({
 		
 		inView.activateView && inView.activateView(forceClear);
 		inPreviousView && inPreviousView.cleanupView && inPreviousView.cleanupView(forceClear);
+		this.owner.updateSort && this.owner.updateSort();
 	},
 	
 	cleanupView: function() {
