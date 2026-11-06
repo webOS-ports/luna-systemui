@@ -91,7 +91,7 @@ enyo.kind({
 				// adapter or a dock does.
 				if(!this.chargingBannerShown) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
-					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
+					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
 					this.chargingBannerShown = true;
 				}  
 			}
@@ -215,12 +215,13 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			// 370 = five buttons at --notification-button-height (68px, see
-			// stylesheets/notifications.css) plus their 3px margins, and it has
-			// to be kept in step with that value: a popup cannot be resized once
-			// it is open, so a height that is short of the content simply cuts
-			// the bottom buttons off.
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 370);
+			// 424 = the gap above the buttons, then five buttons at
+			// --notification-button-height (68px, see
+			// stylesheets/notifications.css) each with --notification-button-gap
+			// (14px) under it. It has to be kept in step with those values: a
+			// popup cannot be resized once it is open, so a height that is short
+			// of the content simply cuts the bottom buttons off.
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 424);
 		}
 	},
 
