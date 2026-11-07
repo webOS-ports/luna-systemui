@@ -111,7 +111,7 @@ enyo.kind({
 		var callParams = {
       		id: 'com.palm.app.help',
       		params: {
-          		target: "http://help.palm.com/basics/turn_phone_on_off/basics_wireless_services_on_off.html"
+          		target: "https://help.luneos.org/basics/turn-all-wireless-services-on-off-airplane-mode.html"
       		}
   		};
 		this.$.launchHelp.call(callParams);

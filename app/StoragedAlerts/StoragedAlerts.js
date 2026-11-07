@@ -96,7 +96,7 @@ enyo.kind({
 		var callParams = {
       		id: 'com.palm.app.help',
       		params: {
-          		target: "http://help.palm.com/basics/copy_files/basics_media_sync_help.html"
+          		target: "https://help.luneos.org/basics/copy-music-photos-and-videos-between-your-computer-and-your-device.html"
       		}
   		};
 		this.$.launchHelp.call(callParams);
