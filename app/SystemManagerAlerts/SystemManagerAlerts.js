@@ -577,7 +577,7 @@ enyo.kind({
 	
 	getInstructions: function() {
 		this.buttonTapped = true;
-		var callParams = {id: 'com.palm.app.help', "params":{target: "http://help.palm.com/basics/basics_db_full.html"}};
+		var callParams = {id: 'com.palm.app.help', "params":{target: "https://help.luneos.org/storage/check-how-much-storage-is-in-use.html"}};
 		this.$.launchApp.call(callParams);
 		close();
 	},
@@ -1241,7 +1241,7 @@ enyo.kind({
 	
 	getInstructions: function() {
 		this.buttonTapped = true;
-		var callParams = {id: 'com.palm.app.help', "params":{target: "http://help.palm.com/clinkarticle/basics_delete_files.html"}};
+		var callParams = {id: 'com.palm.app.help', "params":{target: "https://help.luneos.org/basics/delete-files-from-your-device.html"}};
 		this.$.launchApp.call(callParams);
 		close();
 	},
