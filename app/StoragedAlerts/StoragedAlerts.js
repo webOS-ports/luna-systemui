@@ -21,11 +21,12 @@
  * USB mode selector, shown when a USB host is connected: File Transfer (MTP,
  * served by umtprd via com.palm.storage) or Charge only.
  *
- * Laid out the way legacy webOS showed its USB prompt: just the two black
- * notification pills, the first carrying the info button, with no heading -
- * the buttons say what the choice is. Sized like PowerdAlerts' PowerOffAlert
- * (the .usb-mode rules in notifications.css), and StoragedService opens the
- * popup at exactly the height of the two buttons.
+ * A heading - title, a line of explanation and the USB icon - over two
+ * notification pills: a green File Transfer carrying the info button, and a
+ * black Charge only. The pills
+ * are sized like PowerdAlerts' PowerOffAlert (the .usb-mode rules in
+ * notifications.css), and StoragedService opens the popup at the height of
+ * the heading and the two buttons.
  */
 
 enyo.kind({
@@ -33,8 +34,33 @@ enyo.kind({
 	kind: "VFlexBox",
 	className: "usb-mode",
 	components: [
+		{
+			kind: enyo.Control,
+			className: "notification-container",
+			domAttributes:{
+				"x-palm-popup-content": " "
+			},
+			components: [
+				{
+					className: "notification-icon icon-drive-mode"
+				},
+				{
+					className: "notification-text",
+					components: [
+						{
+							className: "title",
+							content: $L("USB Connected")
+						},
+						{
+							className: "message",
+							content: $L("Choose how to use the USB connection.")
+						}
+					]
+				}
+			]
+		 },
 		 {kind: "ApplicationEvents", onWindowDeactivated:"handleWindowDeActivated"},
-		 {kind: "NotificationButton", className:"enyo-notification-button", layoutKind:"HFlexLayout",
+		 {kind: "NotificationButton", className:"enyo-notification-button-affirmative", layoutKind:"HFlexLayout",
 			 components:[
 		                   {flex:1, content: $L("File Transfer"), onclick: "enterMSM"},
 		                   {name:"infoIcon", className:"info-icon", onclick: "showInfo"}

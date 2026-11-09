@@ -111,14 +111,14 @@ body {
 .system-notification.usb-mode .info-icon {
   height: 50px;
   width: 66px;
-  background: url(../images/palm-notification-button-info.png) no-repeat top center;
+  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat top center;
   right: -20px;
   position: absolute;
   margin-top: -3px;
 }
 
 .system-notification.usb-mode .info-icon.selected {
-  background: url(../images/palm-notification-button-info.png) no-repeat center center;
+  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat center center;
 }
 
 
@@ -175,7 +175,7 @@ body {
 	position: relative;
 }
 
-.power-menu .enyo-notification-button-affirmative {
+.power-menu .enyo-notification-button-affirmative, .usb-mode .enyo-notification-button-affirmative {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 0 22 104 22 repeat repeat;
 }
 .power-menu .enyo-notification-button-alternate {
@@ -191,7 +191,9 @@ body {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 52 22 52 22 repeat repeat;
 }
 .power-menu .enyo-notification-button-affirmative.enyo-button-down,
-.power-menu .enyo-notification-button-affirmative.enyo-button-depressed {
+.power-menu .enyo-notification-button-affirmative.enyo-button-depressed,
+.usb-mode .enyo-notification-button-affirmative.enyo-button-down,
+.usb-mode .enyo-notification-button-affirmative.enyo-button-depressed {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 52 22 52 22 repeat repeat;
 }
 .power-menu .enyo-notification-button-alternate.enyo-button-down,
@@ -215,8 +217,8 @@ body {
 	right: -14px;
 }
 
-/* The USB prompt's info button sits on a black button, so it takes the dark
- * variant of the icon. */
+/* The USB prompt's info button sits on the green File Transfer button, so it
+ * takes the affirmative variant of the icon. */
 .usb-mode .info-icon {
-	background-image: url(../images/palm-notification-button-info.png);
+	background-image: url(../images/palm-notification-button-affirmative-info.png);
 }

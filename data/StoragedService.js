@@ -74,12 +74,12 @@ enyo.kind({
 	 */
 	showStorageModeAlert: function() {
 		var wCard = enyo.windows.fetchWindow("StorageModeAlert");
-		// The gap above the buttons, then two buttons at
-		// --notification-button-height (52px, see stylesheets/notifications.css)
-		// each with --notification-button-gap (10px) under it, as for the power
-		// menu; the prompt has no text left to wrap differently by locale.
-		// Anything taller is empty space under the buttons.
-		var windowHeight = 134;
+		// The heading (title, a line of explanation and the 80px USB icon)
+		// over two buttons at --notification-button-height (52px, see
+		// stylesheets/notifications.css), each with --notification-button-gap
+		// (10px) under it, as for the power menu. Other locales get room for
+		// the explanation to wrap onto a second line, as they always did.
+		var windowHeight = (enyo.g11n.currentLocale().locale == "en_us") ? 256 : 276;
 		if(!wCard)
 			enyo.windows.openPopup("app/StoragedAlerts/storagedalerts.html", "StorageModeAlert", {}, undefined, windowHeight);
 	},
