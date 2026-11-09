@@ -122,25 +122,24 @@ body {
 }
 
 
-/* Power menu and USB prompt: legacy webOS's glass buttons.
+/* Power menu and USB prompt: legacy webOS's notification buttons.
  *
- * Both are drawn the way LunaSysMgr drew them (measured off a Pre3): each
- * button a rounded slab inset from the screen edges, a lighter upper half
- * fading down to a hard horizon just below the middle, a lower half that
- * brightens again towards the bottom, a 1px light rim along both edges and a
- * regular-weight label. Onyx's own notification button - a near-square
- * border-image stretched edge to edge over a flat colour, bold label - is
- * switched off for these two alerts only.
+ * Drawn as Mojo drew a system notification's buttons
+ * (global-notifications.css): its own glass sprites, 52px a state, as a
+ * border-image with 22px caps - black for a plain button, green, yellow
+ * and red for the others - and the second state, a lit glass, while
+ * pressed. The sprites are the ones the mojo-framework package installs,
+ * so the buttons are those pixels rather than an imitation of them.
+ * Onyx's own notification button - a near-square border-image stretched
+ * edge to edge over a flat colour, bold label - is switched off for these
+ * two alerts only.
  *
- * Size: Mojo's own, from global-notifications.css - a 52px button (the
- * height of a dashboard, so a popup's buttons and the dashboards under them
- * read as one set), 5px above and below it, a 20px label. The stock
- * notification button comes out 40 css px tall, ~5mm on every device we ship
- * (css px are close to physically constant here, because
- * WAM_PAGE_ZOOM_FACTOR is tuned per device), too small a target for the
- * power menu's five stacked buttons; 52 comes out about 6.5mm, against
- * 7.1mm on a Pre (52px at 186 ppi). 68px, tried
- * for a 9mm target, swamped the small square screen of a Q25.
+ * Size is Mojo's too: a 52px button (a dashboard's height, so a popup's
+ * buttons and the dashboards under them read as one set) and a 20px white
+ * label. css px are close to physically constant here (WAM_PAGE_ZOOM_FACTOR
+ * is tuned per device), so 52 comes out about 6.5mm, against 7.1mm on a
+ * Pre (52px at 186 ppi), and takes the same share of a Q25's 720 lines as
+ * of a Pre's 480.
  *
  * Scoped on purpose. Every other alert derives its popup height from a
  * constant that assumes the stock button, and those popups cannot be resized
@@ -161,68 +160,47 @@ body {
 	height: var(--notification-button-height);
 	/* The label sits in a child that stretches, with its text at the top, so
 	 * a line box the full height of the button is what centres it. */
-	line-height: calc(var(--notification-button-height) - 2px);
+	line-height: var(--notification-button-height);
 	margin: 0 var(--notification-button-gap) var(--notification-button-gap);
-	padding: 0 12px;
-	-webkit-border-image: none;
-	border: 1px solid rgba(0, 0, 0, 0.7);
-	border-radius: calc(var(--notification-button-height) * 0.19);
+	padding: 0;
+	background: none;
+	border-style: solid;
+	border-width: 0 22px;
+	border-radius: 0;
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 0 22 104 22 repeat repeat;
 	font-size: 20px;
 	font-weight: normal;
 	color: #fff;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
-	background: linear-gradient(to bottom,
-		var(--glass-rim-top) 0,
-		var(--glass-top) 2px,
-		var(--glass-horizon-above) 47%,
-		var(--glass-horizon-below) 48%,
-		var(--glass-bottom) calc(100% - 3px),
-		var(--glass-rim-bottom) 100%);
 	/* So the info icon below has something to anchor against. */
 	position: relative;
-	/* Black (Cancel, the USB prompt's buttons). */
-	--glass-rim-top: #787878;
-	--glass-top: #595959;
-	--glass-horizon-above: #1b1b1b;
-	--glass-horizon-below: #010101;
-	--glass-bottom: #313131;
-	--glass-rim-bottom: #585858;
 }
 
 .power-menu .enyo-notification-button-affirmative {
-	--glass-rim-top: #abe380;
-	--glass-top: #86c758;
-	--glass-horizon-above: #407e19;
-	--glass-horizon-below: #2d6909;
-	--glass-bottom: #5e9f35;
-	--glass-rim-bottom: #80c159;
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 0 22 104 22 repeat repeat;
 }
-
 .power-menu .enyo-notification-button-alternate {
-	--glass-rim-top: #f4cd4e;
-	--glass-top: #e3b62c;
-	--glass-horizon-above: #a76b03;
-	--glass-horizon-below: #965802;
-	--glass-bottom: #bc8103;
-	--glass-rim-bottom: #dda518;
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 0 22 104 22 repeat repeat;
 }
-
 .power-menu .enyo-notification-button-negative {
-	--glass-rim-top: #ea9180;
-	--glass-top: #dd725d;
-	--glass-horizon-above: #ad270a;
-	--glass-horizon-below: #a01c01;
-	--glass-bottom: #cc4428;
-	--glass-rim-bottom: #df6048;
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 0 22 104 22 repeat repeat;
 }
 
-/* Onyx swaps its border-image back in for the pressed state; darken the
- * glass instead. */
+/* Pressed: the sprite's second state, as Mojo's .palm-button.selected. */
 .power-menu .enyo-button.enyo-button-down, .usb-mode .enyo-button.enyo-button-down,
 .power-menu .enyo-button.enyo-button-depressed, .usb-mode .enyo-button.enyo-button-depressed {
-	-webkit-border-image: none;
-	-webkit-filter: brightness(0.8);
-	filter: brightness(0.8);
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 52 22 52 22 repeat repeat;
+}
+.power-menu .enyo-notification-button-affirmative.enyo-button-down,
+.power-menu .enyo-notification-button-affirmative.enyo-button-depressed {
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 52 22 52 22 repeat repeat;
+}
+.power-menu .enyo-notification-button-alternate.enyo-button-down,
+.power-menu .enyo-notification-button-alternate.enyo-button-depressed {
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 52 22 52 22 repeat repeat;
+}
+.power-menu .enyo-notification-button-negative.enyo-button-down,
+.power-menu .enyo-notification-button-negative.enyo-button-depressed {
+	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 52 22 52 22 repeat repeat;
 }
 
 /* The info button sits inside the right end of its button, centred. Its
@@ -233,7 +211,8 @@ body {
 	top: 50%;
 	height: 50px;
 	margin-top: -23px;
-	right: 4px;
+	/* Over the button's right cap, as the 22px border is the cap. */
+	right: -14px;
 }
 
 /* The USB prompt's info button sits on a black button, so it takes the dark
