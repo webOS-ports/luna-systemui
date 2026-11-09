@@ -132,14 +132,15 @@ body {
  * border-image stretched edge to edge over a flat colour, bold label - is
  * switched off for these two alerts only.
  *
- * Height: the stock notification button comes out 40 css px tall, which is
- * ~5mm on every device we ship (measured: 5.0mm on tissot, 5.4mm on
- * mindphone) - css px are close to physically constant here, because
- * WAM_PAGE_ZOOM_FACTOR is tuned per device. That is well under the ~9mm both
- * Material (48dp) and iOS (44pt) treat as the minimum, and it is worst on the
- * power menu: five stacked buttons where "Shut Down" sits directly above
- * "Cancel", so a near miss is expensive. The gap between buttons helps there
- * too.
+ * Size: Mojo's own, from global-notifications.css - a 52px button (the
+ * height of a dashboard, so a popup's buttons and the dashboards under them
+ * read as one set), 5px above and below it, a 20px label. The stock
+ * notification button comes out 40 css px tall, ~5mm on every device we ship
+ * (css px are close to physically constant here, because
+ * WAM_PAGE_ZOOM_FACTOR is tuned per device), too small a target for the
+ * power menu's five stacked buttons; 52 comes out about 6.5mm, against
+ * 7.1mm on a Pre (52px at 186 ppi). 68px, tried
+ * for a 9mm target, swamped the small square screen of a Q25.
  *
  * Scoped on purpose. Every other alert derives its popup height from a
  * constant that assumes the stock button, and those popups cannot be resized
@@ -149,8 +150,8 @@ body {
  * be kept in step with these values.
  */
 .power-menu, .usb-mode {
-	--notification-button-height: 68px;
-	--notification-button-gap: 14px;
+	--notification-button-height: 52px;
+	--notification-button-gap: 10px;
 	padding-top: var(--notification-button-gap);
 }
 
@@ -166,10 +167,7 @@ body {
 	-webkit-border-image: none;
 	border: 1px solid rgba(0, 0, 0, 0.7);
 	border-radius: calc(var(--notification-button-height) * 0.19);
-	/* Not webOS's proportion (about 0.44 of the button): these buttons are
-	 * taller than webOS's for the sake of the touch target, and the label
-	 * scaled with them came out far larger than webOS's did in the hand. */
-	font-size: 22px;
+	font-size: 20px;
 	font-weight: normal;
 	color: #fff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
@@ -227,11 +225,14 @@ body {
 	filter: brightness(0.8);
 }
 
-/* The info button sits inside the right end of its button, centred; the
- * -18px is half its 37px height. */
+/* The info button sits inside the right end of its button, centred. Its
+ * sprites hold one state per 50px band, the glyph in rows 8 to 37 of each:
+ * a 50px box shows the normal state at the top and the pressed one at the
+ * centre, both with the glyph's middle 23px down. */
 .power-menu .info-icon, .usb-mode .info-icon {
 	top: 50%;
-	margin-top: -18px;
+	height: 50px;
+	margin-top: -23px;
 	right: 4px;
 }
 
