@@ -17,6 +17,7 @@
 // LICENSE@@@
 
 enyo.depends(
+		"../../utils/dashboardstyle.js",
 		"../../stylesheets/dashboard.css",
 		"../../stylesheets/notifications.css",
 		"AppManagerAlerts.js"

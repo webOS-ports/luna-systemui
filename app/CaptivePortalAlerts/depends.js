@@ -17,6 +17,7 @@
 // LICENSE@@@
 
 enyo.depends(
+		"../../utils/dashboardstyle.js",
 		"../../utils/uiscale.js",
 		"CaptivePortalAlerts.js",
 		"../../stylesheets/dashboard.css",
