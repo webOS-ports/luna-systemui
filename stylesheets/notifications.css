@@ -128,11 +128,14 @@ body {
  * when UiScale.tablet() (utils/uiscale.js) says this is no tablet.
  *
  * Drawn as Mojo drew a system notification's buttons
- * (global-notifications.css): its own glass sprites, 52px a state, as a
+ * (global-notifications.css): glass sprites, 52px a state, as a
  * border-image with 22px caps - black for a plain button, green, yellow
  * and red for the others - and the second state, a lit glass, while
- * pressed. The sprites are the ones the mojo-framework package installs,
- * so the buttons are those pixels rather than an imitation of them.
+ * pressed. The mojo-framework package cannot be a dependency here, so
+ * images/phone-notification-button*.png recreate its sprites: each column
+ * of a cap, and one of the middle, is a vertical gradient fitted to Mojo's
+ * to within 4 levels a channel, normal state in rows 0-51 and pressed in
+ * 52-103. PNG rather than SVG, which is slow to draw on older devices.
  * Onyx's own notification button - a near-square border-image stretched
  * edge to edge over a flat colour, bold label - is switched off for these
  * two alerts only, on a phone.
@@ -182,7 +185,7 @@ body {
 	border-style: solid;
 	border-width: 0 22px;
 	border-radius: 0;
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 0 22 104 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button.png) 0 22 52 22 repeat repeat;
 	font-size: 20px;
 	font-weight: normal;
 	color: #fff;
@@ -191,33 +194,33 @@ body {
 }
 
 .phone-ui.power-menu .enyo-notification-button-affirmative, .phone-ui.usb-mode .enyo-notification-button-affirmative {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 0 22 104 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-affirmative.png) 0 22 52 22 repeat repeat;
 }
 .phone-ui.power-menu .enyo-notification-button-alternate {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 0 22 104 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-alternate.png) 0 22 52 22 repeat repeat;
 }
 .phone-ui.power-menu .enyo-notification-button-negative {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 0 22 104 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-negative.png) 0 22 52 22 repeat repeat;
 }
 
 /* Pressed: the sprite's second state, as Mojo's .palm-button.selected. */
 .phone-ui.power-menu .enyo-button.enyo-button-down, .phone-ui.usb-mode .enyo-button.enyo-button-down,
 .phone-ui.power-menu .enyo-button.enyo-button-depressed, .phone-ui.usb-mode .enyo-button.enyo-button-depressed {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 52 22 52 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button.png) 52 22 0 22 repeat repeat;
 }
 .phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-down,
 .phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-depressed,
 .phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-down,
 .phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-depressed {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 52 22 52 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-affirmative.png) 52 22 0 22 repeat repeat;
 }
 .phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-down,
 .phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-depressed {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 52 22 52 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-alternate.png) 52 22 0 22 repeat repeat;
 }
 .phone-ui.power-menu .enyo-notification-button-negative.enyo-button-down,
 .phone-ui.power-menu .enyo-notification-button-negative.enyo-button-depressed {
-	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 52 22 52 22 repeat repeat;
+	-webkit-border-image: url(../images/phone-notification-button-negative.png) 52 22 0 22 repeat repeat;
 }
 
 /* The info button sits inside the right end of its button, centred. Its
