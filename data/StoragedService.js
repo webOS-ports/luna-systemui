@@ -77,9 +77,12 @@ enyo.kind({
 		// The heading (title, a line of explanation and the 80px USB icon)
 		// over two buttons at --notification-button-height (52px, see
 		// stylesheets/notifications.css), each with --notification-button-gap
-		// (10px) under it, as for the power menu. Other locales get room for
-		// the explanation to wrap onto a second line, as they always did.
-		var windowHeight = (enyo.g11n.currentLocale().locale == "en_us") ? 256 : 276;
+		// (10px) under it, as for the power menu: the popup ends that gap under
+		// Charge only, right on the gesture area. Other languages get room for
+		// the explanation to wrap onto a second line. The locale reads "en-US",
+		// not "en_us", so it is matched by its language.
+		var english = /^en([-_]|$)/i.test(enyo.g11n.currentLocale().locale || "");
+		var windowHeight = english ? 214 : 234;
 		if(!wCard)
 			enyo.windows.openPopup("app/StoragedAlerts/storagedalerts.html", "StorageModeAlert", {}, undefined, windowHeight);
 	},
