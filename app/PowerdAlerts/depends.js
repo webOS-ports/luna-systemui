@@ -17,6 +17,7 @@
 // LICENSE@@@
 
 enyo.depends(	
+		"../../utils/uiscale.js",
 		"../../stylesheets/notifications.css",
 		"PowerdAlerts.js"
 );

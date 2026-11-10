@@ -96,8 +96,12 @@ enyo.kind({
 		// Gives notifications.css a handle to enlarge these buttons with. Scoped
 		// to this alert rather than applied to every notification button,
 		// because the other alerts size their popups from constants that assume
-		// the stock button height.
+		// the stock button height. On a phone they become 2.2.4's pills; a
+		// tablet keeps Enyo's own, 3.0.5's.
 		this.addClass("power-menu");
+		if (typeof UiScale === "undefined" || !UiScale.tablet()) {
+			this.addClass("phone-ui");
+		}
 		this.inAirplaneMode = enyo.application.getSystemPreferences().airplaneMode;
 		this.$.flightmode.setContent(this.inAirplaneMode ? $L("Turn off Airplane Mode") : $L("Airplane Mode"));
 	},

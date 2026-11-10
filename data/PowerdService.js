@@ -91,7 +91,7 @@ enyo.kind({
 				// adapter or a dock does.
 				if(!this.chargingBannerShown) {
 					var soundClassName = enyo.application.getTelephonyService().getOnActiveCall() ? "none" : "notifications";
-					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-small-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
+					enyo.windows.addBannerMessage($L("Charging Battery"), "{}",'/usr/palm/applications/com.palm.systemui/images/notification-charging.png', soundClassName, "/usr/palm/sounds/charging.mp3");
 					this.chargingBannerShown = true;
 				}  
 			}
@@ -215,12 +215,14 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			// 370 = five buttons at --notification-button-height (68px, see
-			// stylesheets/notifications.css) plus their 3px margins, and it has
-			// to be kept in step with that value: a popup cannot be resized once
-			// it is open, so a height that is short of the content simply cuts
-			// the bottom buttons off.
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 370);
+			// Five buttons and the gaps around them; a popup cannot be resized
+			// once it is open, so a height short of the content cuts the bottom
+			// buttons off. On a phone (stylesheets/notifications.css, .phone-ui):
+			// 7px above, then each 52px button with 4px under it, then 3px - 290.
+			// On a tablet, Enyo's own buttons, as 3.0.5 had them: 3px above, each
+			// 40px button 6px apart, 3px below - 230.
+			var height = (typeof UiScale !== "undefined" && UiScale.tablet()) ? 230 : 290;
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, height);
 		}
 	},
 

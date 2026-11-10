@@ -18,14 +18,21 @@
 // LICENSE@@@
 
 /*
- * USB mode selector, shown when a USB host is connected. Android-style: the
- * user picks File Transfer (MTP, served by umtprd via com.palm.storage) or
- * Charge only. Modelled on PowerdAlerts' multi-button PowerOffAlert.
+ * USB mode selector, shown when a USB host is connected: File Transfer (MTP,
+ * served by umtprd via com.palm.storage) or Charge only.
+ *
+ * A heading - title, a line of explanation and the USB icon - over two
+ * notification pills: a green File Transfer carrying the info button, and a
+ * black Charge only. The pills
+ * are sized like PowerdAlerts' PowerOffAlert (the .usb-mode rules in
+ * notifications.css), and StoragedService opens the popup at the height of
+ * the heading and the two buttons.
  */
 
 enyo.kind({
 	name: "StorageAlert",
 	kind: "VFlexBox",
+	className: "usb-mode",
 	components: [
 		{
 			kind: enyo.Control,
@@ -74,6 +81,11 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.tapOnButton = false;
+		// 2.2.4's pills on a phone (the .phone-ui rules in notifications.css);
+		// a tablet keeps Enyo's own, 3.0.5's.
+		if (typeof UiScale === "undefined" || !UiScale.tablet()) {
+			this.addClass("phone-ui");
+		}
 	},
 
 	// One tap enters MTP, with no second "warning" popup. But never while the
@@ -138,7 +150,7 @@ enyo.kind({
 enyo.kind({
 	name: "USBDashboard",
 	kind: "HFlexBox",
-	className:"dashboard-window",
+	className:"dashboard-window usb-dashboard",
 	inMSM: false,
 	components: [
 		{

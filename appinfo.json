@@ -10,6 +10,7 @@
 	"defaultWindowType": "system_ui",
 	"noSplashOnLaunch": true,
 	"noWindow":true,
+	"transparent": true,
 	"visible": false,
 	"requiredPermissions": ["all"] 
 }

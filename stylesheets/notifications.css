@@ -111,51 +111,132 @@ body {
 .system-notification.usb-mode .info-icon {
   height: 50px;
   width: 66px;
-  background: url(../images/palm-notification-button-info.png) no-repeat top center;
+  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat top center;
   right: -20px;
   position: absolute;
   margin-top: -3px;
 }
 
 .system-notification.usb-mode .info-icon.selected {
-  background: url(../images/palm-notification-button-info.png) no-repeat center center;
+  background: url(../images/palm-notification-button-affirmative-info.png) no-repeat center center;
 }
 
 
-/* Power menu touch targets.
+/* Power menu and USB prompt on a phone: webOS 2.2.4's notification buttons.
+ * A tablet keeps Enyo's own NotificationButton, the pills webOS 3.0.5 showed
+ * there; these rules apply under .phone-ui only, which the two alerts set
+ * when UiScale.tablet() (utils/uiscale.js) says this is no tablet.
  *
- * The stock notification button comes out 40 css px tall, which is ~5mm on
- * every device we ship (measured: 5.0mm on tissot, 5.4mm on mindphone) - css px
- * are close to physically constant here, because WAM_PAGE_ZOOM_FACTOR is tuned
- * per device. That is well under the ~9mm both Material (48dp) and iOS (44pt)
- * treat as the minimum, and it is worst on this alert: five stacked buttons
- * where "Shut Down" sits directly above "Cancel", so a near miss is expensive.
+ * Drawn as Mojo drew a system notification's buttons
+ * (global-notifications.css): glass sprites, 52px a state, as a
+ * border-image with 22px caps - black for a plain button, green, yellow
+ * and red for the others - and the second state, a lit glass, while
+ * pressed. The mojo-framework package cannot be a dependency here, so
+ * images/phone-notification-button*.png recreate its sprites: each column
+ * of a cap, and one of the middle, is a vertical gradient fitted to Mojo's
+ * to within 4 levels a channel, normal state in rows 0-51 and pressed in
+ * 52-103. PNG rather than SVG, which is slow to draw on older devices.
+ * Onyx's own notification button - a near-square border-image stretched
+ * edge to edge over a flat colour, bold label - is switched off for these
+ * two alerts only, on a phone.
  *
- * Scoped to .power-menu on purpose. Every other alert derives its popup height
- * from a constant that assumes the stock button, and those popups cannot be
- * resized once open, so enlarging the buttons globally would clip them.
+ * Size is Mojo's too: a 52px button (a dashboard's height, so a popup's
+ * buttons and the dashboards under them read as one set) and a 20px white
+ * label. css px are close to physically constant here (WAM_PAGE_ZOOM_FACTOR
+ * is tuned per device), so 52 comes out about 6.5mm, against 7.1mm on a
+ * Pre (52px at 186 ppi), and takes the same share of a Q25's 720 lines as
+ * of a Pre's 480.
+ *
+ * Scoped on purpose. Every other alert derives its popup height from a
+ * constant that assumes the stock button, and those popups cannot be resized
+ * once open, so changing the buttons globally would clip them. The two
+ * popups here are opened at exactly the height of their buttons and gaps:
+ * PowerdService.showPowerOffAlert and StoragedService.showStorageAlert have to
+ * be kept in step with these values.
  */
-.power-menu {
-	--notification-button-height: 68px;
+.phone-ui.power-menu, .phone-ui.usb-mode {
+	--notification-button-height: 52px;
+	/* What shows between two pills, and around them: 2.2.4's luna-systemui
+	 * gave its 45px buttons margin: 10px. */
+	--notification-button-gap: 10px;
+	/* The rows of each 52px sprite band above and below the pill that are
+	 * transparent (rows 0-2 and 49-51), so part of every gap already. */
+	--notification-button-inset: 3px;
+	padding-top: calc(var(--notification-button-gap) - var(--notification-button-inset));
+	padding-bottom: var(--notification-button-inset);
 }
 
-.power-menu .enyo-notification-button {
+/* The USB prompt's heading, the same gap above the first pill. */
+.phone-ui.usb-mode .notification-container {
+	margin-bottom: calc(var(--notification-button-gap) - var(--notification-button-inset));
+}
+
+.phone-ui.power-menu .enyo-button, .phone-ui.usb-mode .enyo-button {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 	height: var(--notification-button-height);
-	/* Centres the label. The button has no vertical centring of its own - the
-	 * child stretches and the text sits at the top of it - so the line box has
-	 * to fill the content box: the height less 6px of border-image and 4px of
-	 * padding, top and bottom. */
-	line-height: calc(var(--notification-button-height) - 20px);
-	/* So the info icon below has something to anchor against. Without it the
-	 * icon resolves right:1px against the viewport, which only looked right
-	 * because the button happens to span the full width. */
+	/* The label sits in a child that stretches, with its text at the top, so
+	 * a line box the full height of the button is what centres it. */
+	line-height: var(--notification-button-height);
+	margin: 0 var(--notification-button-gap)
+	        calc(var(--notification-button-gap) - 2 * var(--notification-button-inset));
+	padding: 0;
+	background: none;
+	border-style: solid;
+	border-width: 0 22px;
+	border-radius: 0;
+	-webkit-border-image: url(../images/phone-notification-button.png) 0 22 52 22 repeat repeat;
+	font-size: 20px;
+	font-weight: normal;
+	color: #fff;
+	/* So the info icon below has something to anchor against. */
 	position: relative;
 }
 
-/* The icon is absolutely positioned off its static position, so it stayed put
- * when the button grew and ended up hugging the top edge. Centre it instead;
- * the -18px is half its 37px height. */
-.power-menu .info-icon {
+.phone-ui.power-menu .enyo-notification-button-affirmative, .phone-ui.usb-mode .enyo-notification-button-affirmative {
+	-webkit-border-image: url(../images/phone-notification-button-affirmative.png) 0 22 52 22 repeat repeat;
+}
+.phone-ui.power-menu .enyo-notification-button-alternate {
+	-webkit-border-image: url(../images/phone-notification-button-alternate.png) 0 22 52 22 repeat repeat;
+}
+.phone-ui.power-menu .enyo-notification-button-negative {
+	-webkit-border-image: url(../images/phone-notification-button-negative.png) 0 22 52 22 repeat repeat;
+}
+
+/* Pressed: the sprite's second state, as Mojo's .palm-button.selected. */
+.phone-ui.power-menu .enyo-button.enyo-button-down, .phone-ui.usb-mode .enyo-button.enyo-button-down,
+.phone-ui.power-menu .enyo-button.enyo-button-depressed, .phone-ui.usb-mode .enyo-button.enyo-button-depressed {
+	-webkit-border-image: url(../images/phone-notification-button.png) 52 22 0 22 repeat repeat;
+}
+.phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-depressed,
+.phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-down,
+.phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-depressed {
+	-webkit-border-image: url(../images/phone-notification-button-affirmative.png) 52 22 0 22 repeat repeat;
+}
+.phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-depressed {
+	-webkit-border-image: url(../images/phone-notification-button-alternate.png) 52 22 0 22 repeat repeat;
+}
+.phone-ui.power-menu .enyo-notification-button-negative.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-negative.enyo-button-depressed {
+	-webkit-border-image: url(../images/phone-notification-button-negative.png) 52 22 0 22 repeat repeat;
+}
+
+/* The info button sits inside the right end of its button, centred. Its
+ * sprites hold one state per 50px band, the glyph in rows 8 to 37 of each:
+ * a 50px box shows the normal state at the top and the pressed one at the
+ * centre, both with the glyph's middle 23px down. */
+.phone-ui.power-menu .info-icon, .phone-ui.usb-mode .info-icon {
 	top: 50%;
-	margin-top: -18px;
+	height: 50px;
+	margin-top: -23px;
+	/* Over the button's right cap, as the 22px border is the cap. */
+	right: -14px;
+}
+
+/* The USB prompt's info button sits on the green File Transfer button, so it
+ * takes the affirmative variant of the icon. */
+.usb-mode .info-icon {
+	background-image: url(../images/palm-notification-button-affirmative-info.png);
 }

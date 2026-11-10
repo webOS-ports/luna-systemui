@@ -17,6 +17,7 @@
 // LICENSE@@@
 
 enyo.depends(		
+		"../../utils/dashboardstyle.js",
 		"../../utils/uiscale.js",
 		"StoragedAlerts.js",
 		"../../stylesheets/dashboard.css",

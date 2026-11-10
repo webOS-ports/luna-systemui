@@ -74,7 +74,18 @@ enyo.kind({
 	 */
 	showStorageModeAlert: function() {
 		var wCard = enyo.windows.fetchWindow("StorageModeAlert");
-		var windowHeight =  (enyo.g11n.currentLocale().locale == "en_us") ? 200 : 220;
+		// The heading (title, a line of explanation and the 80px USB icon)
+		// and two buttons, ending right on the gesture area. On a phone
+		// (stylesheets/notifications.css, .phone-ui) the buttons are 52px
+		// with the same visible gap as 2.2.4's around them: 210 in all, 81 of
+		// it the heading. On a tablet, Enyo's own buttons under 3.0.5's
+		// heading, at 3.0.5's 200.
+		// Other languages get room for the explanation to wrap onto a second
+		// line. The locale reads "en-US", not "en_us", so it is matched by
+		// its language.
+		var english = /^en([-_]|$)/i.test(enyo.g11n.currentLocale().locale || "");
+		var tablet = typeof UiScale !== "undefined" && UiScale.tablet();
+		var windowHeight = (tablet ? 200 : 210) + (english ? 0 : 20);
 		if(!wCard)
 			enyo.windows.openPopup("app/StoragedAlerts/storagedalerts.html", "StorageModeAlert", {}, undefined, windowHeight);
 	},

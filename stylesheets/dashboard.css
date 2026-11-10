@@ -192,3 +192,160 @@ palm-dashboard-text.normal {
 }
 
 
+
+/*
+ * Every dashboard, laid out as the shell lays out a toast
+ * (luna-next-cardshell NotificationItem.qml), so the two kinds of entry line
+ * up in the notification area. In vh, proportions of the dashboard window's
+ * height, which is the entry's height, whatever the page zoom.
+ *
+ * The shell draws what is behind: webOS 2.2.4's rounded pill on phones, the
+ * flat row of webOS 3.0.5's drop-down on tablets. So the legacy container
+ * artwork above is switched off - the 2.2.4 sprite it names was never in this
+ * repository, and dashboard-container.png would draw a second, older pill
+ * over the shell's.
+ *
+ * Phone (webOS 2.2.4): Mojo's 48 px icon on a 52 px row, 48/52 of the
+ * height, centred on the 1.02 wide icon pill; text from 1.34, as on a Pre, a
+ * bold title over a regular line of the same size.
+ * Tablet (webOS 3.0.5): the same icon centred in Enyo's 50/52 cell 6/52 in, text
+ * from 74/52, the line under the title smaller (14 against 16 px). Which
+ * of the two is the shell's notificationStyle, as utils/dashboardstyle.js
+ * reads it, and not the window's shape: either can be listed at the bottom
+ * or in the status bar's drop-down.
+ */
+/* Full width: with both its children positioned absolutely, the module
+ * would otherwise shrink to nothing and clip the text away. */
+.dashboard-window .dashboard-notification-module {
+	width: 100vw;
+	height: 100vh;
+	position: relative;
+}
+.dashboard-window .palm-dashboard-icon-container,
+.dashboard-window .palm-dashboard-text-container,
+.dashboard-window .palm-dashboard-icon-container:active,
+.dashboard-window .palm-dashboard-text-container:active,
+.dashboard-window .palm-dashboard-icon-container.selected,
+.dashboard-window .palm-dashboard-text-container.selected,
+.dashboard-window .single .palm-dashboard-icon-container,
+.dashboard-window .single .palm-dashboard-text-container,
+.dashboard-window .single:active .palm-dashboard-icon-container,
+.dashboard-window .single:active .palm-dashboard-text-container,
+.dashboard-window .single.selected .palm-dashboard-icon-container,
+.dashboard-window .single.selected .palm-dashboard-text-container {
+	-webkit-border-image: none;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+	float: none;
+}
+.dashboard-window .palm-dashboard-icon-container {
+	position: absolute;
+	left: 4.846vh;
+	top: 3.846vh;
+	width: 92.308vh;
+	height: 92.308vh;
+}
+/* Three classes deep, to outrank the per-account icon rules above, whose
+ * background shorthand would put the size back to the image's own. */
+.dashboard-window .palm-dashboard-icon-container .palm-dashboard-icon {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background-position: center center;
+	background-size: contain;
+}
+.dashboard-window .palm-dashboard-icon.charging {
+	background: url(../images/notification-usb.png) center center no-repeat;
+	background-size: contain;
+}
+/* Two 40vh lines, centred: 10vh above and below. */
+.dashboard-window .palm-dashboard-text-container {
+	position: absolute;
+	left: 134vh;
+	right: 20vh;
+	top: 10vh;
+	width: auto;
+	height: 80vh;
+	max-width: none;
+	display: block;
+}
+.dashboard-window .dashboard-title,
+.dashboard-window .palm-dashboard-text {
+	font-size: 31.5vh;
+	line-height: 40vh;
+	margin: 0;
+	color: #fff;
+}
+.dashboard-window .palm-dashboard-text {
+	font-weight: normal;
+}
+/* The count: the shell's NotificationBadge (20/48 of the height, a dark
+ * ring a twentieth of that, Mojo's blue gloss), hung on the same spot, the
+ * top right of the icon pill and 3/48 past it (1.02 + 0.0625 of the
+ * height from the left). Drawn here rather than with
+ * dashboard-newitem-badge.png, a 28 px border-image that would not scale
+ * and whose -active variant is missing. */
+.dashboard-window .dashboard-newitem,
+.dashboard-window .palm-dashboard-icon-container:active .dashboard-newitem,
+.dashboard-window .palm-dashboard-icon-container.selected .dashboard-newitem {
+	position: absolute;
+	top: -3.846vh;
+	left: auto;
+	right: -11.096vh;
+	float: none;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	height: 41.67vh;
+	min-width: 41.67vh;
+	padding: 0 10.4vh;
+	border: 2.08vh solid rgba(4, 4, 4, 0.8);
+	-webkit-border-image: none;
+	border-radius: 20.83vh;
+	background: linear-gradient(#A8D1F6 0%, #517DA4 6%, #345069 49%,
+	                            #233747 50%, #416483 94%, #4E86AF 100%) padding-box;
+	line-height: 37.5vh;
+	font-size: 29.17vh;
+	font-weight: bold;
+	text-align: center;
+	color: #fff;
+}
+.dashboard-window .dashboard-newitem span {
+	position: static;
+	margin: 0;
+	font-size: inherit;
+}
+.dashboard-window .single .dashboard-newitem {
+	display: none;
+}
+/* Pressed: webOS 2.2.4's pill lightened to #616161-#6E6E6E from
+ * #262626-#383838, about a quarter of the way to white, over the shell's
+ * bar and with its corners (a sixth of the height). */
+.dashboard-window .dashboard-notification-module:active {
+	background: rgba(255, 255, 255, 0.27);
+	border-radius: 16.67vh;
+}
+
+/* A tablet's (utils/dashboardstyle.js: Settings' notificationStyle, or
+ * TabletUi for "auto"), wherever the shell lists it. */
+.luneos-tablet .dashboard-window .palm-dashboard-icon-container {
+	left: 13.462vh;
+}
+.luneos-tablet .dashboard-window .palm-dashboard-text-container {
+	left: 142.3vh;
+	right: 11.5vh;
+}
+.luneos-tablet .dashboard-window .palm-dashboard-text {
+	font-size: 27.5vh;
+}
+/* Over the cell's top right: 6/52 + 50/52 + 3/52 in, 3/52 down. */
+.luneos-tablet .dashboard-window .dashboard-newitem,
+.luneos-tablet .dashboard-window .palm-dashboard-icon-container:active .dashboard-newitem,
+.luneos-tablet .dashboard-window .palm-dashboard-icon-container.selected .dashboard-newitem {
+	top: 1.923vh;
+	right: -7.692vh;
+}
+/* The drop-down's rows are flat; a tap shades the row, square. */
+.luneos-tablet .dashboard-window .dashboard-notification-module:active {
+	border-radius: 0;
+}
