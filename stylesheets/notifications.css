@@ -122,7 +122,10 @@ body {
 }
 
 
-/* Power menu and USB prompt: legacy webOS's notification buttons.
+/* Power menu and USB prompt on a phone: webOS 2.2.4's notification buttons.
+ * A tablet keeps Enyo's own NotificationButton, the pills webOS 3.0.5 showed
+ * there; these rules apply under .phone-ui only, which the two alerts set
+ * when UiScale.tablet() (utils/uiscale.js) says this is no tablet.
  *
  * Drawn as Mojo drew a system notification's buttons
  * (global-notifications.css): its own glass sprites, 52px a state, as a
@@ -132,7 +135,7 @@ body {
  * so the buttons are those pixels rather than an imitation of them.
  * Onyx's own notification button - a near-square border-image stretched
  * edge to edge over a flat colour, bold label - is switched off for these
- * two alerts only.
+ * two alerts only, on a phone.
  *
  * Size is Mojo's too: a 52px button (a dashboard's height, so a popup's
  * buttons and the dashboards under them read as one set) and a 20px white
@@ -148,20 +151,32 @@ body {
  * PowerdService.showPowerOffAlert and StoragedService.showStorageAlert have to
  * be kept in step with these values.
  */
-.power-menu, .usb-mode {
+.phone-ui.power-menu, .phone-ui.usb-mode {
 	--notification-button-height: 52px;
+	/* What shows between two pills, and around them: 2.2.4's luna-systemui
+	 * gave its 45px buttons margin: 10px. */
 	--notification-button-gap: 10px;
-	padding-top: var(--notification-button-gap);
+	/* The rows of each 52px sprite band above and below the pill that are
+	 * transparent (rows 0-2 and 49-51), so part of every gap already. */
+	--notification-button-inset: 3px;
+	padding-top: calc(var(--notification-button-gap) - var(--notification-button-inset));
+	padding-bottom: var(--notification-button-inset);
 }
 
-.power-menu .enyo-button, .usb-mode .enyo-button {
+/* The USB prompt's heading, the same gap above the first pill. */
+.phone-ui.usb-mode .notification-container {
+	margin-bottom: calc(var(--notification-button-gap) - var(--notification-button-inset));
+}
+
+.phone-ui.power-menu .enyo-button, .phone-ui.usb-mode .enyo-button {
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	height: var(--notification-button-height);
 	/* The label sits in a child that stretches, with its text at the top, so
 	 * a line box the full height of the button is what centres it. */
 	line-height: var(--notification-button-height);
-	margin: 0 var(--notification-button-gap) var(--notification-button-gap);
+	margin: 0 var(--notification-button-gap)
+	        calc(var(--notification-button-gap) - 2 * var(--notification-button-inset));
 	padding: 0;
 	background: none;
 	border-style: solid;
@@ -175,33 +190,33 @@ body {
 	position: relative;
 }
 
-.power-menu .enyo-notification-button-affirmative, .usb-mode .enyo-notification-button-affirmative {
+.phone-ui.power-menu .enyo-notification-button-affirmative, .phone-ui.usb-mode .enyo-notification-button-affirmative {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 0 22 104 22 repeat repeat;
 }
-.power-menu .enyo-notification-button-alternate {
+.phone-ui.power-menu .enyo-notification-button-alternate {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 0 22 104 22 repeat repeat;
 }
-.power-menu .enyo-notification-button-negative {
+.phone-ui.power-menu .enyo-notification-button-negative {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 0 22 104 22 repeat repeat;
 }
 
 /* Pressed: the sprite's second state, as Mojo's .palm-button.selected. */
-.power-menu .enyo-button.enyo-button-down, .usb-mode .enyo-button.enyo-button-down,
-.power-menu .enyo-button.enyo-button-depressed, .usb-mode .enyo-button.enyo-button-depressed {
+.phone-ui.power-menu .enyo-button.enyo-button-down, .phone-ui.usb-mode .enyo-button.enyo-button-down,
+.phone-ui.power-menu .enyo-button.enyo-button-depressed, .phone-ui.usb-mode .enyo-button.enyo-button-depressed {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button.png) 52 22 52 22 repeat repeat;
 }
-.power-menu .enyo-notification-button-affirmative.enyo-button-down,
-.power-menu .enyo-notification-button-affirmative.enyo-button-depressed,
-.usb-mode .enyo-notification-button-affirmative.enyo-button-down,
-.usb-mode .enyo-notification-button-affirmative.enyo-button-depressed {
+.phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-affirmative.enyo-button-depressed,
+.phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-down,
+.phone-ui.usb-mode .enyo-notification-button-affirmative.enyo-button-depressed {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-affirmative.png) 52 22 52 22 repeat repeat;
 }
-.power-menu .enyo-notification-button-alternate.enyo-button-down,
-.power-menu .enyo-notification-button-alternate.enyo-button-depressed {
+.phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-alternate.enyo-button-depressed {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-alternate.png) 52 22 52 22 repeat repeat;
 }
-.power-menu .enyo-notification-button-negative.enyo-button-down,
-.power-menu .enyo-notification-button-negative.enyo-button-depressed {
+.phone-ui.power-menu .enyo-notification-button-negative.enyo-button-down,
+.phone-ui.power-menu .enyo-notification-button-negative.enyo-button-depressed {
 	-webkit-border-image: url(/usr/palm/frameworks/mojo/submissions/506/images/palm-notification-button-negative.png) 52 22 52 22 repeat repeat;
 }
 
@@ -209,7 +224,7 @@ body {
  * sprites hold one state per 50px band, the glyph in rows 8 to 37 of each:
  * a 50px box shows the normal state at the top and the pressed one at the
  * centre, both with the glyph's middle 23px down. */
-.power-menu .info-icon, .usb-mode .info-icon {
+.phone-ui.power-menu .info-icon, .phone-ui.usb-mode .info-icon {
 	top: 50%;
 	height: 50px;
 	margin-top: -23px;

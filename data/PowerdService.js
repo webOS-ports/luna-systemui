@@ -215,13 +215,14 @@ enyo.kind({
 	showPowerOffAlert: function() {
 		var wCard = enyo.windows.fetchWindow("PowerOffAlert");
 		if(!wCard) {
-			// 320 = the gap above the buttons, then five buttons at
-			// --notification-button-height (52px, see
-			// stylesheets/notifications.css) each with --notification-button-gap
-			// (10px) under it. It has to be kept in step with those values: a
-			// popup cannot be resized once it is open, so a height that is short
-			// of the content simply cuts the bottom buttons off.
-			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, 320);
+			// Five buttons and the gaps around them; a popup cannot be resized
+			// once it is open, so a height short of the content cuts the bottom
+			// buttons off. On a phone (stylesheets/notifications.css, .phone-ui):
+			// 7px above, then each 52px button with 4px under it, then 3px - 290.
+			// On a tablet, Enyo's own buttons, as 3.0.5 had them: 3px above, each
+			// 40px button 6px apart, 3px below - 230.
+			var height = (typeof UiScale !== "undefined" && UiScale.tablet()) ? 230 : 290;
+			enyo.windows.openPopup("app/PowerdAlerts/powerdalerts.html", "PowerOffAlert", {}, undefined, height);
 		}
 	},
 

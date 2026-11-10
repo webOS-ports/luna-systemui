@@ -81,6 +81,11 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.tapOnButton = false;
+		// 2.2.4's pills on a phone (the .phone-ui rules in notifications.css);
+		// a tablet keeps Enyo's own, 3.0.5's.
+		if (typeof UiScale === "undefined" || !UiScale.tablet()) {
+			this.addClass("phone-ui");
+		}
 	},
 
 	// One tap enters MTP, with no second "warning" popup. But never while the

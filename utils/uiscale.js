@@ -59,6 +59,32 @@ UiScale.factor = function() {
 	return w.outerWidth / w.innerWidth;
 };
 
+/*
+ * Whether this is a tablet, as legacy webOS decided it: by the screen in css
+ * px, which PalmSystem.deviceInfo gives (WAM divides the panel by the page
+ * zoom). The shortest side tells them apart - 320 to 480 on phones (450 on a
+ * Q25 or a Pixel 3a), 768 on a TouchPad, 640 on a Galaxy Tab 4 - and does not
+ * change with rotation. Phones show the alerts' buttons as 2.2.4 did,
+ * tablets as 3.0.5 did. Read from the root window's PalmSystem, which
+ * every popup can reach; anything unreadable counts as a phone.
+ */
+UiScale.tablet = function() {
+	var info = null;
+
+	try {
+		var root = enyo.windows.getRootWindow() || window;
+		info = JSON.parse(root.PalmSystem.deviceInfo);
+	} catch (e) {
+		return false;
+	}
+
+	if (!info || !(info.screenWidth > 0) || !(info.screenHeight > 0)) {
+		return false;
+	}
+
+	return Math.min(info.screenWidth, info.screenHeight) >= 600;
+};
+
 UiScale.toDevicePixels = function(cssPixels) {
 	return Math.round(cssPixels * UiScale.factor());
 };
