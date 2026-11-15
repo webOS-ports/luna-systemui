@@ -1,0 +1,17 @@
+[
+    {
+        "category": "system",
+        "owner": "com.palm.systemui",
+        "prefs": [
+            {
+                "group": "usb",
+                "restart": "none",
+                "label": "Just charge by default",
+                "help": "When a USB cable is plugged in, just charge, without asking whether to use File Transfer. The USB notification still offers File Transfer.",
+                "key": "justChargeByDefault",
+                "type": "ToggleButton",
+                "value": true
+            }
+        ]
+    }
+]

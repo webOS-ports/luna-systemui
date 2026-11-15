@@ -29,13 +29,82 @@ enyo.kind({
 		{
 			kind:enyo.PalmService, name:"hostIsConnected", service:"palm://com.palm.storage/diskmode/", method:"hostIsConnected", onResponse:"handleHostIsConnected"
 		},
+		{
+			// Tweaks > System > USB, "Just charge by default": followed while it changes.
+			kind:enyo.PalmService, name:"justChargeTweak", service:"palm://org.webosports.service.tweaks.prefs/", method:"get", subscribe:true, onResponse:"handleJustChargeTweak"
+		},
 		
 	],
 	
+	/*
+	 * Just charge by default (Tweaks > System > USB, on unless turned off): a cable
+	 * plugged in goes straight to the USB dashboard ("Charging - tap for File
+	 * Transfer"), as if Charge only had been tapped, and the File Transfer /
+	 * Charge only prompt is not shown - as the "just charge by default" patch
+	 * did for legacy webOS.
+	 *
+	 * For now this also keeps the prompt from being drawn over another popup
+	 * opened with it, such as "Device May Not Charge" (luna-next-cardshell
+	 * #500), until the shell shows popups one at a time.
+	 *
+	 * undefined until the Tweaks service answers. A prompt due before then
+	 * waits for the answer (promptPending), or for JUST_CHARGE_WAIT_MS; no
+	 * answer, or no such tweak, is the default, on.
+	 */
+	justCharge: undefined,
+	promptPending: false,
+	JUST_CHARGE_WAIT_MS: 5000,
+	
 	create: function() {
 		this.inherited(arguments);
+		this.$.justChargeTweak.call({"owner": "com.palm.systemui", "key": "justChargeByDefault"});
+		setTimeout(enyo.bind(this, function() {
+			if (this.justCharge === undefined)
+				this.setJustCharge(true);
+		}), this.JUST_CHARGE_WAIT_MS);
 		this.subscribeToNotifications();
 		this.isUSBCableConnected();
+	},
+	
+	handleJustChargeTweak: function(inSender, inResponse) {
+		if (!inResponse || inResponse.returnValue === false) {
+			if (this.justCharge === undefined)
+				this.setJustCharge(true);
+			return;
+		}
+		var value = inResponse.justChargeByDefault;
+		if (typeof value === "boolean")
+			this.setJustCharge(value);
+		else if (this.justCharge === undefined)
+			this.setJustCharge(true);
+	},
+	
+	setJustCharge: function(justCharge) {
+		this.justCharge = justCharge;
+		if (!this.promptPending)
+			return;
+		this.promptPending = false;
+		if (!this.isUSBConnected)
+			return;
+		if (this.canUSBAlertDisplayed())
+			this.offerStorageMode();
+		else
+			this.createUSBDashboard();
+	},
+	
+	/*
+	 * The cable is in and nothing stands in the way of the prompt: the prompt,
+	 * or with Just charge by default the dashboard it would have left.
+	 */
+	offerStorageMode: function() {
+		if (this.justCharge === undefined) {
+			this.promptPending = true;
+			return;
+		}
+		if (this.justCharge)
+			this.createUSBDashboard();
+		else
+			this.showStorageModeAlert();
 	},
 	
 	subscribeToNotifications: function() {
@@ -59,12 +128,13 @@ enyo.kind({
 				return;
 			this.isUSBConnected = true;
 			if (this.canUSBAlertDisplayed()) 
-				this.showStorageModeAlert();
+				this.offerStorageMode();
 			else 
 				this.createUSBDashboard();
 		}
 	    else {
 			this.isUSBConnected = false;
+			this.promptPending = false;
 			this.closeUSBAlerts();
 	    }
 	},
@@ -144,7 +214,7 @@ enyo.kind({
 						if (enyo.application.getSysUpdateService().getUpdateAvailable()) 
 							this.createUSBDashboard();
 						else 
-							this.showStorageModeAlert();
+							this.offerStorageMode();
 			}			
 		}
 	},
