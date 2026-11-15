@@ -35,7 +35,8 @@ function load() {
 	const src = fs.readFileSync(path.join(__dirname, "..", "data", "StoragedService.js"), "utf8");
 	vm.runInContext(src, sandbox);
 	const def = Object.values(kinds)[0];
-	const obj = Object.assign(Object.create(def), { isUSBConnected: false });
+	// Tweaks > System > USB, Just charge by default, off: these are about the prompt itself.
+	const obj = Object.assign(Object.create(def), { isUSBConnected: false, justCharge: false });
 	return { obj, opened };
 }
 
